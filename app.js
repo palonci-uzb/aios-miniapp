@@ -7,7 +7,7 @@ if (tg) {
 
 
 /* =====================================================
-   AIOS CONTENT ENGINE
+   AIOS CONTENT ENGINE & STATE
 ===================================================== */
 
 const state = {
@@ -18,9 +18,145 @@ const state = {
         passages: []
     },
 
-    weaknesses: {}
+    weaknesses: {},
+
+    // Navigation history
+    navigation: [],
+
+    // Current test
+    currentTest: {
+        fileName: null,
+        title: null,
+        category: null
+    }
 
 };
+
+
+/* =====================================================
+   NAVIGATION SYSTEM & BACK BUTTON
+===================================================== */
+
+let telegramBackHandlerAttached = false;
+
+function showSection(sectionId, saveHistory = true) {
+
+    const sections = [
+        "main-dashboard",
+        "reading-hub",
+        "qtype-view",
+        "weakness-analytics",
+        "test-view"
+    ];
+
+    const current =
+        sections.find(id => {
+            const el = document.getElementById(id);
+            return el && !el.classList.contains("hidden");
+        });
+
+
+    // Oldingi sahifani history'ga saqlash
+    if (
+        saveHistory &&
+        current &&
+        current !== sectionId
+    ) {
+        state.navigation.push(current);
+    }
+
+
+    sections.forEach(id => {
+
+        const element =
+            document.getElementById(id);
+
+        if (!element) return;
+
+        if (id === sectionId) {
+            element.classList.remove("hidden");
+        } else {
+            element.classList.add("hidden");
+        }
+
+    });
+
+
+    updateBackButton();
+
+
+    if (sectionId === "weakness-analytics") {
+        renderAnalytics();
+    }
+
+}
+
+
+function goBack() {
+
+    // Agar history mavjud bo'lsa,
+    // faqat BITTA qadam orqaga qaytamiz.
+    if (state.navigation.length > 0) {
+
+        const previous =
+            state.navigation.pop();
+
+        showSection(
+            previous,
+            false
+        );
+
+        updateBackButton();
+
+        return;
+    }
+
+
+    // History tugagan bo'lsa Dashboard
+    showSection(
+        "main-dashboard",
+        false
+    );
+
+}
+
+
+function updateBackButton() {
+
+    const buttons =
+        document.querySelectorAll(
+            ".back-btn"
+        );
+
+
+    buttons.forEach(button => {
+
+        button.onclick = goBack;
+
+    });
+
+
+    if (!tg) return;
+
+
+    if (!telegramBackHandlerAttached) {
+
+        tg.BackButton.onClick(
+            goBack
+        );
+
+        telegramBackHandlerAttached = true;
+
+    }
+
+
+    if (state.navigation.length > 0) {
+        tg.BackButton.show();
+    } else {
+        tg.BackButton.hide();
+    }
+
+}
 
 
 /* =====================================================
@@ -85,42 +221,6 @@ async function loadContentBank() {
 
         }
 
-    }
-
-}
-
-
-/* =====================================================
-   NAVIGATION
-===================================================== */
-
-function showSection(sectionId) {
-
-    const sections = [
-        "main-dashboard",
-        "reading-hub",
-        "qtype-view",
-        "weakness-analytics",
-        "test-view"
-    ];
-
-    sections.forEach(id => {
-
-        const element =
-            document.getElementById(id);
-
-        if (!element) return;
-
-        if (id === sectionId) {
-            element.classList.remove("hidden");
-        } else {
-            element.classList.add("hidden");
-        }
-
-    });
-
-    if (sectionId === "weakness-analytics") {
-        renderAnalytics();
     }
 
 }
@@ -540,7 +640,7 @@ function openQuestionType(
 
 
 /* =====================================================
-   OPEN ORIGINAL IELTS TEST
+   OPEN TEST & SESSION PERSISTENCE
 ===================================================== */
 
 function openTest(
@@ -549,19 +649,66 @@ function openTest(
     category
 ) {
 
-    showSection("test-view");
-
-
     const frame =
         document.getElementById(
             "test-frame"
         );
 
-
     const titleEl =
         document.getElementById(
             "active-test-title"
         );
+
+
+    // Agar boshqa testga o'tayotgan bo'lsak,
+    // hozirgi testni history'ga saqlaymiz.
+    const currentSection =
+        document.getElementById(
+            "test-view"
+        );
+
+
+    if (
+        !currentSection.classList.contains(
+            "hidden"
+        ) &&
+        state.currentTest.fileName &&
+        state.currentTest.fileName !== fileName
+    ) {
+
+        saveCurrentTest();
+
+    }
+
+
+    state.currentTest = {
+        fileName: fileName,
+        title: title,
+        category: category
+    };
+
+
+    showSection(
+        "test-view"
+    );
+
+
+    titleEl.innerText =
+        `${category}: ${cleanTitle(title)}`;
+
+
+    // Shu test allaqachon ochilgan bo'lsa,
+    // iframe'ni qayta yuklamaymiz.
+    if (
+        frame.src &&
+        frame.dataset.file === fileName
+    ) {
+
+        restoreTestState();
+
+        return;
+
+    }
 
 
     const basePath =
@@ -574,11 +721,297 @@ function openTest(
             .replace(/%2F/g, "/");
 
 
+    frame.dataset.file =
+        fileName;
+
+
     frame.src = url;
 
 
-    titleEl.innerText =
-        `${category}: ${cleanTitle(title)}`;
+    frame.onload = function () {
+
+        attachTestStateSaver();
+
+        restoreTestState();
+
+    };
+
+}
+
+
+function getTestStorageKey() {
+
+    if (!state.currentTest.fileName) {
+        return null;
+    }
+
+    return (
+        "aios_test_" +
+        state.currentTest.fileName
+    );
+
+}
+
+
+function saveCurrentTest() {
+
+    const frame =
+        document.getElementById(
+            "test-frame"
+        );
+
+
+    if (!frame) return;
+
+    try {
+
+        const doc =
+            frame.contentDocument ||
+            frame.contentWindow.document;
+
+
+        const data = {
+            selects: {},
+            inputs: {},
+            checkboxes: [],
+            savedAt: Date.now()
+        };
+
+
+        // SELECT
+        doc.querySelectorAll(
+            "select"
+        ).forEach(select => {
+
+            if (select.id) {
+
+                data.selects[
+                    select.id
+                ] = select.value;
+
+            }
+
+        });
+
+
+        // INPUT
+        doc.querySelectorAll(
+            'input[type="text"]'
+        ).forEach(input => {
+
+            if (input.id) {
+
+                data.inputs[
+                    input.id
+                ] = input.value;
+
+            }
+
+        });
+
+
+        // CHECKBOX
+        doc.querySelectorAll(
+            'input[type="checkbox"]'
+        ).forEach((checkbox, index) => {
+
+            if (checkbox.checked) {
+
+                data.checkboxes.push(
+                    index
+                );
+
+            }
+
+        });
+
+
+        const key =
+            getTestStorageKey();
+
+
+        if (key) {
+
+            localStorage.setItem(
+                key,
+                JSON.stringify(data)
+            );
+
+        }
+
+    } catch (error) {
+
+        console.log(
+            "Test state save error:",
+            error
+        );
+
+    }
+
+}
+
+
+function restoreTestState() {
+
+    const key =
+        getTestStorageKey();
+
+
+    if (!key) return;
+
+
+    const saved =
+        localStorage.getItem(key);
+
+
+    if (!saved) return;
+
+
+    try {
+
+        const data =
+            JSON.parse(saved);
+
+
+        const frame =
+            document.getElementById(
+                "test-frame"
+            );
+
+
+        const doc =
+            frame.contentDocument ||
+            frame.contentWindow.document;
+
+
+        // SELECT
+        Object.entries(
+            data.selects || {}
+        ).forEach(
+            ([id, value]) => {
+
+                const element =
+                    doc.getElementById(id);
+
+                if (element) {
+                    element.value = value;
+                    element.dispatchEvent(
+                        new Event("change")
+                    );
+                }
+
+            }
+        );
+
+
+        // TEXT INPUT
+        Object.entries(
+            data.inputs || {}
+        ).forEach(
+            ([id, value]) => {
+
+                const element =
+                    doc.getElementById(id);
+
+                if (element) {
+                    element.value = value;
+                    element.dispatchEvent(
+                        new Event("input")
+                    );
+                }
+
+            }
+        );
+
+
+        // CHECKBOX
+        const checkboxes =
+            doc.querySelectorAll(
+                'input[type="checkbox"]'
+            );
+
+
+        (data.checkboxes || [])
+            .forEach(index => {
+
+                if (checkboxes[index]) {
+
+                    checkboxes[index].checked =
+                        true;
+
+                    checkboxes[index]
+                        .dispatchEvent(
+                            new Event("change")
+                        );
+
+                }
+
+            });
+
+
+        console.log(
+            "AIOS: test state restored"
+        );
+
+
+    } catch (error) {
+
+        console.log(
+            "Test restore error:",
+            error
+        );
+
+    }
+
+}
+
+
+function attachTestStateSaver() {
+
+    const frame =
+        document.getElementById(
+            "test-frame"
+        );
+
+
+    try {
+
+        const doc =
+            frame.contentDocument ||
+            frame.contentWindow.document;
+
+
+        doc.addEventListener(
+            "input",
+            saveCurrentTest
+        );
+
+
+        doc.addEventListener(
+            "change",
+            saveCurrentTest
+        );
+
+
+        // Har 2 sekundda backup
+        if (!window.aiosSaveInterval) {
+
+            window.aiosSaveInterval =
+                setInterval(
+                    saveCurrentTest,
+                    2000
+                );
+
+        }
+
+    } catch (error) {
+
+        console.log(
+            "State saver error:",
+            error
+        );
+
+    }
 
 }
 
