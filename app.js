@@ -5,42 +5,96 @@ if (tg) {
     tg.ready();
 }
 
-
 /* =====================================================
-   AIOS CONTENT ENGINE & STATE
+   AIOS STATE
 ===================================================== */
 
 const state = {
-
     bank: {
         version: 0,
         updated_at: "",
         passages: []
     },
-
     weaknesses: {},
-
-    // Navigation history
     navigation: [],
-
-    // Current test
     currentTest: {
         fileName: null,
         title: null,
         category: null
     }
-
 };
 
 
 /* =====================================================
-   NAVIGATION SYSTEM & BACK BUTTON
+   LOCAL STORAGE
 ===================================================== */
 
-let telegramBackHandlerAttached = false;
+const WEAKNESS_KEY = "aios_weaknesses_v1";
+const TEST_STATE_KEY = "aios_test_state_v1";
+
+function loadWeaknesses() {
+    try {
+        const saved = localStorage.getItem(WEAKNESS_KEY);
+        if (saved) {
+            state.weaknesses = JSON.parse(saved);
+        }
+    } catch (error) {
+        console.error("Weakness load error:", error);
+        state.weaknesses = {};
+    }
+}
+
+function saveWeaknesses() {
+    localStorage.setItem(
+        WEAKNESS_KEY,
+        JSON.stringify(state.weaknesses)
+    );
+}
+
+
+/* =====================================================
+   CONTENT BANK
+===================================================== */
+
+async function loadContentBank() {
+    try {
+        const response = await fetch("content_bank.json?t=" + Date.now());
+
+        if (!response.ok) {
+            throw new Error("content_bank.json topilmadi");
+        }
+
+        state.bank = await response.json();
+
+        console.log("AIOS Content Bank:", state.bank);
+
+        renderPassages();
+        renderQuestionTypes();
+        updatePassageCount();
+
+    } catch (error) {
+        console.error("Content Engine Error:", error);
+
+        const list = document.getElementById("full-practice-list");
+
+        if (list) {
+            list.innerHTML = `
+                <div class="analytics-card">
+                    <h3>? Content Bank Error</h3>
+                    <p>content_bank.json yuklanmadi.</p>
+                    <p>GitHub Pages'ga content_bank.json faylini push qiling.</p>
+                </div>
+            `;
+        }
+    }
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
 
 function showSection(sectionId, saveHistory = true) {
-
     const sections = [
         "main-dashboard",
         "reading-hub",
@@ -49,28 +103,17 @@ function showSection(sectionId, saveHistory = true) {
         "test-view"
     ];
 
-    const current =
-        sections.find(id => {
-            const el = document.getElementById(id);
-            return el && !el.classList.contains("hidden");
-        });
+    const current = sections.find(id => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains("hidden");
+    });
 
-
-    // Oldingi sahifani history'ga saqlash
-    if (
-        saveHistory &&
-        current &&
-        current !== sectionId
-    ) {
+    if (saveHistory && current && current !== sectionId) {
         state.navigation.push(current);
     }
 
-
     sections.forEach(id => {
-
-        const element =
-            document.getElementById(id);
-
+        const element = document.getElementById(id);
         if (!element) return;
 
         if (id === sectionId) {
@@ -78,151 +121,39 @@ function showSection(sectionId, saveHistory = true) {
         } else {
             element.classList.add("hidden");
         }
-
     });
 
-
     updateBackButton();
-
 
     if (sectionId === "weakness-analytics") {
         renderAnalytics();
     }
-
 }
-
 
 function goBack() {
-
-    // Agar history mavjud bo'lsa,
-    // faqat BITTA qadam orqaga qaytamiz.
-    if (state.navigation.length > 0) {
-
-        const previous =
-            state.navigation.pop();
-
-        showSection(
-            previous,
-            false
-        );
-
+    if (state.navigation.length) {
+        const previous = state.navigation.pop();
+        showSection(previous, false);
         updateBackButton();
-
         return;
     }
-
-
-    // History tugagan bo'lsa Dashboard
-    showSection(
-        "main-dashboard",
-        false
-    );
-
+    showSection("main-dashboard", false);
 }
 
-
 function updateBackButton() {
-
-    const buttons =
-        document.querySelectorAll(
-            ".back-btn"
-        );
-
-
-    buttons.forEach(button => {
-
+    document.querySelectorAll(".back-btn").forEach(button => {
         button.onclick = goBack;
-
     });
-
 
     if (!tg) return;
 
-
-    if (!telegramBackHandlerAttached) {
-
-        tg.BackButton.onClick(
-            goBack
-        );
-
-        telegramBackHandlerAttached = true;
-
-    }
-
-
-    if (state.navigation.length > 0) {
+    if (state.navigation.length) {
         tg.BackButton.show();
+        tg.BackButton.offClick(goBack);
+        tg.BackButton.onClick(goBack);
     } else {
         tg.BackButton.hide();
     }
-
-}
-
-
-/* =====================================================
-   LOAD CONTENT BANK
-===================================================== */
-
-async function loadContentBank() {
-
-    try {
-
-        const response = await fetch(
-            "content_bank.json?t=" + Date.now()
-        );
-
-        if (!response.ok) {
-            throw new Error(
-                "content_bank.json topilmadi"
-            );
-        }
-
-        state.bank = await response.json();
-
-        console.log(
-            "AIOS Content Bank loaded:",
-            state.bank
-        );
-
-        renderPassages();
-        renderQuestionTypes();
-
-        updatePassageCount();
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Content Engine Error:",
-            error
-        );
-
-        const list =
-            document.getElementById(
-                "full-practice-list"
-            );
-
-        if (list) {
-
-            list.innerHTML = `
-                <div class="analytics-card">
-                    <h3>? Content Bank Error</h3>
-                    <p>
-                        content_bank.json yuklanmadi.
-                    </p>
-                    <p>
-                        GitHub Pages'ga
-                        <b>content_bank.json</b>
-                        faylini ham push qiling.
-                    </p>
-                </div>
-            `;
-
-        }
-
-    }
-
 }
 
 
@@ -231,48 +162,22 @@ async function loadContentBank() {
 ===================================================== */
 
 function switchReadingTab(tab) {
-
-    const fullTab =
-        document.getElementById(
-            "full-practice-tab"
-        );
-
-    const typesTab =
-        document.getElementById(
-            "question-types-tab"
-        );
-
-    const btnFull =
-        document.getElementById(
-            "tab-full"
-        );
-
-    const btnTypes =
-        document.getElementById(
-            "tab-types"
-        );
-
+    const full = document.getElementById("full-practice-tab");
+    const types = document.getElementById("question-types-tab");
+    const fullButton = document.getElementById("tab-full");
+    const typesButton = document.getElementById("tab-types");
 
     if (tab === "full") {
-
-        fullTab.classList.remove("hidden");
-        typesTab.classList.add("hidden");
-
-        btnFull.classList.add("active");
-        btnTypes.classList.remove("active");
-
+        full.classList.remove("hidden");
+        types.classList.add("hidden");
+        fullButton.classList.add("active");
+        typesButton.classList.remove("active");
+    } else {
+        full.classList.add("hidden");
+        types.classList.remove("hidden");
+        fullButton.classList.remove("active");
+        typesButton.classList.add("active");
     }
-
-    else {
-
-        fullTab.classList.add("hidden");
-        typesTab.classList.remove("hidden");
-
-        btnFull.classList.remove("active");
-        btnTypes.classList.add("active");
-
-    }
-
 }
 
 
@@ -281,928 +186,342 @@ function switchReadingTab(tab) {
 ===================================================== */
 
 function updatePassageCount() {
-
-    const badge =
-        document.getElementById(
-            "passage-count"
-        );
-
+    const badge = document.getElementById("passage-count");
     if (!badge) return;
 
-    const count =
-        state.bank.passages.length;
-
-    badge.innerText =
-        `${count} Passage${count === 1 ? "" : "s"} Loaded`;
-
+    const count = state.bank.passages?.length || 0;
+    badge.innerText = `${count} Passage${count === 1 ? "" : "s"} Loaded`;
 }
 
 
 /* =====================================================
-   FULL PRACTICE LIST
+   PASSAGE LIST
 ===================================================== */
 
 function renderPassages() {
-
-    const container =
-        document.getElementById(
-            "full-practice-list"
-        );
-
+    const container = document.getElementById("full-practice-list");
     if (!container) return;
 
     container.innerHTML = "";
-
-    const passages =
-        state.bank.passages || [];
-
+    const passages = state.bank.passages || [];
 
     if (!passages.length) {
-
         container.innerHTML = `
             <div class="analytics-card">
                 <h3>?? Reading bank empty</h3>
-                <p>
-                    practise reading papkasiga
-                    HTML fayl qo'shing.
-                </p>
+                <p>practise reading papkasiga HTML fayl qo‘shing.</p>
             </div>
         `;
-
         return;
     }
 
-
     passages.forEach((passage, index) => {
-
-        const button =
-            document.createElement("button");
-
+        const button = document.createElement("button");
         button.className = "test-btn";
 
-
-        const questionTypes =
-            getPassageQuestionTypes(
-                passage
-            );
-
+        const types = getPassageQuestionTypes(passage);
 
         button.innerHTML = `
             <div class="test-info">
-
-                <strong>
-                    ?? Passage ${index + 1}:
-                </strong>
-
-                ${escapeHtml(
-                    cleanTitle(
-                        passage.title
-                    )
-                )}
-
+                <strong>?? Passage ${index + 1}</strong>
+                <br>
+                ${escapeHtml(cleanTitle(passage.title))}
                 <span class="sub-info">
-
-                    ${passage.question_count || 0}
-                    Questions
-
-                    •
-                    ${questionTypes.join(", ")}
-
+                    ${passage.question_count || 0} Questions • ${types.join(", ")}
                 </span>
-
             </div>
         `;
 
-
         button.onclick = () => {
-
-            openTest(
-                passage.filename,
-                passage.title,
-                "Reading"
-            );
-
+            openTest(passage.filename, passage.title, "Reading");
         };
 
-
         container.appendChild(button);
-
     });
-
 }
 
 
 /* =====================================================
-   PASSAGE QUESTION TYPES
+   QUESTION TYPES
 ===================================================== */
 
-function getPassageQuestionTypes(
-    passage
-) {
-
+function getPassageQuestionTypes(passage) {
     const types = new Set();
-
-    (passage.questions || []).forEach(
-        question => {
-
-            if (question.type) {
-                types.add(question.type);
-            }
-
-        }
-    );
-
+    (passage.questions || []).forEach(question => {
+        types.add(question.type || "Other");
+    });
     return Array.from(types);
-
 }
-
-
-/* =====================================================
-   QUESTION TYPE BANK
-===================================================== */
 
 function renderQuestionTypes() {
-
-    const container =
-        document.getElementById(
-            "qtype-grid"
-        );
-
+    const container = document.getElementById("qtype-grid");
     if (!container) return;
 
     container.innerHTML = "";
-
-
     const typeMap = {};
 
+    (state.bank.passages || []).forEach(passage => {
+        (passage.questions || []).forEach(question => {
+            const type = question.type || "Other";
 
-    state.bank.passages.forEach(
-        passage => {
+            if (!typeMap[type]) {
+                typeMap[type] = {
+                    total: 0,
+                    questions: []
+                };
+            }
 
-            (passage.questions || [])
-                .forEach(question => {
+            typeMap[type].total++;
+            typeMap[type].questions.push({
+                ...question,
+                passageTitle: passage.title,
+                filename: passage.filename
+            });
+        });
+    });
 
-                    const type =
-                        question.type ||
-                        "Other";
-
-                    if (!typeMap[type]) {
-
-                        typeMap[type] = {
-                            total: 0,
-                            questions: []
-                        };
-
-                    }
-
-                    typeMap[type].total++;
-
-                    typeMap[type]
-                        .questions
-                        .push({
-                            ...question,
-                            passageTitle:
-                                passage.title,
-                            filename:
-                                passage.filename
-                        });
-
-                });
-
-        }
-    );
-
-
-    const types =
-        Object.keys(typeMap)
-            .sort();
-
+    const types = Object.keys(typeMap).sort();
 
     if (!types.length) {
-
-        container.innerHTML =
-            "<p>Question bank empty.</p>";
-
+        container.innerHTML = `
+            <div class="analytics-card">
+                <h3>?? Question Bank bo‘sh</h3>
+                <p>Reading material qo‘shing.</p>
+            </div>
+        `;
         return;
     }
 
-
     types.forEach(type => {
+        const data = typeMap[type];
 
-        const data =
-            typeMap[type];
-
-
-        const card =
-            document.createElement("div");
-
-        card.className =
-            "qtype-card";
-
+        const card = document.createElement("div");
+        card.className = "qtype-card";
 
         card.innerHTML = `
-
-            <h4>
-                ?? ${escapeHtml(type)}
-            </h4>
-
-            <p>
-                ${data.total} ta savol
-            </p>
-
-            <span class="tag">
-                Practice
-            </span>
-
+            <h4>?? ${escapeHtml(type)}</h4>
+            <p>${data.total} ta savol</p>
+            <span class="tag">Practice ›</span>
         `;
 
-
         card.onclick = () => {
-
-            openQuestionType(
-                type,
-                data.questions
-            );
-
+            openQuestionType(type, data.questions);
         };
 
-
         container.appendChild(card);
-
     });
-
 }
 
 
 /* =====================================================
-   QUESTION TYPE PRACTICE
+   QUESTION TYPE VIEW
 ===================================================== */
 
-function openQuestionType(
-    type,
-    questions
-) {
-
+function openQuestionType(type, questions) {
     showSection("qtype-view");
 
+    const title = document.getElementById("qtype-title");
+    const description = document.getElementById("qtype-description");
+    const list = document.getElementById("qtype-question-list");
 
-    const title =
-        document.getElementById(
-            "qtype-title"
-        );
-
-    const description =
-        document.getElementById(
-            "qtype-description"
-        );
-
-    const list =
-        document.getElementById(
-            "qtype-question-list"
-        );
-
-
-    title.innerText =
-        `?? ${type}`;
-
-
-    description.innerText =
-        `${questions.length} ta savol • `
-        + `AIOS Reading Question Type Bank`;
-
+    title.innerText = `?? ${type}`;
+    description.innerText = `${questions.length} ta savol • AIOS Question Type Bank`;
 
     list.innerHTML = "";
 
-
-    questions.forEach(
-        question => {
-
-            const card =
-                document.createElement(
-                    "div"
-                );
-
-            card.className =
-                "test-btn";
-
-
-            card.innerHTML = `
-
-                <div class="test-info">
-
-                    <strong>
-                        Q${question.number}
-                    </strong>
-
-                    <span class="sub-info">
-
-                        ${escapeHtml(
-                            question.passageTitle
-                        )}
-
-                    </span>
-
-                    <p style="
-                        margin-top:8px;
-                        white-space:normal;
-                    ">
-
-                        ${escapeHtml(
-                            question.question ||
-                            question.instruction ||
-                            "Question"
-                        )}
-
-                    </p>
-
-                </div>
-
-            `;
-
-
-            card.onclick = () => {
-
-                openTest(
-                    question.filename,
-                    question.passageTitle,
-                    type
-                );
-
-            };
-
-
-            list.appendChild(card);
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   OPEN TEST & SESSION PERSISTENCE
-===================================================== */
-
-function openTest(
-    fileName,
-    title,
-    category
-) {
-
-    const frame =
-        document.getElementById(
-            "test-frame"
-        );
-
-    const titleEl =
-        document.getElementById(
-            "active-test-title"
-        );
-
-
-    // Agar boshqa testga o'tayotgan bo'lsak,
-    // hozirgi testni history'ga saqlaymiz.
-    const currentSection =
-        document.getElementById(
-            "test-view"
-        );
-
-
-    if (
-        !currentSection.classList.contains(
-            "hidden"
-        ) &&
-        state.currentTest.fileName &&
-        state.currentTest.fileName !== fileName
-    ) {
-
-        saveCurrentTest();
-
-    }
-
-
-    state.currentTest = {
-        fileName: fileName,
-        title: title,
-        category: category
-    };
-
-
-    showSection(
-        "test-view"
-    );
-
-
-    titleEl.innerText =
-        `${category}: ${cleanTitle(title)}`;
-
-
-    // Shu test allaqachon ochilgan bo'lsa,
-    // iframe'ni qayta yuklamaymiz.
-    if (
-        frame.src &&
-        frame.dataset.file === fileName
-    ) {
-
-        restoreTestState();
-
-        return;
-
-    }
-
-
-    const basePath =
-        "practise reading/";
-
-
-    const url =
-        basePath +
-        encodeURIComponent(fileName)
-            .replace(/%2F/g, "/");
-
-
-    frame.dataset.file =
-        fileName;
-
-
-    frame.src = url;
-
-
-    frame.onload = function () {
-
-        attachTestStateSaver();
-
-        restoreTestState();
-
-    };
-
-}
-
-
-function getTestStorageKey() {
-
-    if (!state.currentTest.fileName) {
-        return null;
-    }
-
-    return (
-        "aios_test_" +
-        state.currentTest.fileName
-    );
-
-}
-
-
-function saveCurrentTest() {
-
-    const frame =
-        document.getElementById(
-            "test-frame"
-        );
-
-
-    if (!frame) return;
-
-    try {
-
-        const doc =
-            frame.contentDocument ||
-            frame.contentWindow.document;
-
-
-        const data = {
-            selects: {},
-            inputs: {},
-            checkboxes: [],
-            savedAt: Date.now()
+    questions.forEach(question => {
+        const card = document.createElement("div");
+        card.className = "test-btn";
+
+        card.innerHTML = `
+            <div class="test-info">
+                <strong>Q${question.number}</strong>
+                <span class="sub-info">${escapeHtml(question.passageTitle)}</span>
+                <p style="margin-top:8px; white-space:normal;">
+                    ${escapeHtml(question.question || question.instruction || "Question")}
+                </p>
+            </div>
+        `;
+
+        card.onclick = () => {
+            openTest(question.filename, question.passageTitle, type);
         };
 
-
-        // SELECT
-        doc.querySelectorAll(
-            "select"
-        ).forEach(select => {
-
-            if (select.id) {
-
-                data.selects[
-                    select.id
-                ] = select.value;
-
-            }
-
-        });
-
-
-        // INPUT
-        doc.querySelectorAll(
-            'input[type="text"]'
-        ).forEach(input => {
-
-            if (input.id) {
-
-                data.inputs[
-                    input.id
-                ] = input.value;
-
-            }
-
-        });
-
-
-        // CHECKBOX
-        doc.querySelectorAll(
-            'input[type="checkbox"]'
-        ).forEach((checkbox, index) => {
-
-            if (checkbox.checked) {
-
-                data.checkboxes.push(
-                    index
-                );
-
-            }
-
-        });
-
-
-        const key =
-            getTestStorageKey();
-
-
-        if (key) {
-
-            localStorage.setItem(
-                key,
-                JSON.stringify(data)
-            );
-
-        }
-
-    } catch (error) {
-
-        console.log(
-            "Test state save error:",
-            error
-        );
-
-    }
-
-}
-
-
-function restoreTestState() {
-
-    const key =
-        getTestStorageKey();
-
-
-    if (!key) return;
-
-
-    const saved =
-        localStorage.getItem(key);
-
-
-    if (!saved) return;
-
-
-    try {
-
-        const data =
-            JSON.parse(saved);
-
-
-        const frame =
-            document.getElementById(
-                "test-frame"
-            );
-
-
-        const doc =
-            frame.contentDocument ||
-            frame.contentWindow.document;
-
-
-        // SELECT
-        Object.entries(
-            data.selects || {}
-        ).forEach(
-            ([id, value]) => {
-
-                const element =
-                    doc.getElementById(id);
-
-                if (element) {
-                    element.value = value;
-                    element.dispatchEvent(
-                        new Event("change")
-                    );
-                }
-
-            }
-        );
-
-
-        // TEXT INPUT
-        Object.entries(
-            data.inputs || {}
-        ).forEach(
-            ([id, value]) => {
-
-                const element =
-                    doc.getElementById(id);
-
-                if (element) {
-                    element.value = value;
-                    element.dispatchEvent(
-                        new Event("input")
-                    );
-                }
-
-            }
-        );
-
-
-        // CHECKBOX
-        const checkboxes =
-            doc.querySelectorAll(
-                'input[type="checkbox"]'
-            );
-
-
-        (data.checkboxes || [])
-            .forEach(index => {
-
-                if (checkboxes[index]) {
-
-                    checkboxes[index].checked =
-                        true;
-
-                    checkboxes[index]
-                        .dispatchEvent(
-                            new Event("change")
-                        );
-
-                }
-
-            });
-
-
-        console.log(
-            "AIOS: test state restored"
-        );
-
-
-    } catch (error) {
-
-        console.log(
-            "Test restore error:",
-            error
-        );
-
-    }
-
-}
-
-
-function attachTestStateSaver() {
-
-    const frame =
-        document.getElementById(
-            "test-frame"
-        );
-
-
-    try {
-
-        const doc =
-            frame.contentDocument ||
-            frame.contentWindow.document;
-
-
-        doc.addEventListener(
-            "input",
-            saveCurrentTest
-        );
-
-
-        doc.addEventListener(
-            "change",
-            saveCurrentTest
-        );
-
-
-        // Har 2 sekundda backup
-        if (!window.aiosSaveInterval) {
-
-            window.aiosSaveInterval =
-                setInterval(
-                    saveCurrentTest,
-                    2000
-                );
-
-        }
-
-    } catch (error) {
-
-        console.log(
-            "State saver error:",
-            error
-        );
-
-    }
-
+        list.appendChild(card);
+    });
 }
 
 
 /* =====================================================
-   ANALYTICS
+   TEST OPEN
+===================================================== */
+
+function openTest(fileName, title, category) {
+    state.currentTest = {
+        fileName,
+        title,
+        category
+    };
+
+    showSection("test-view");
+
+    const frame = document.getElementById("test-frame");
+    const titleEl = document.getElementById("active-test-title");
+
+    const basePath = "practise reading/";
+    const url = basePath + encodeURIComponent(fileName).replace(/%2F/g, "/");
+
+    const currentSrc = frame.getAttribute("src");
+
+    if (currentSrc !== url && !currentSrc.endsWith(url)) {
+        frame.src = url;
+    }
+
+    titleEl.innerText = `${category}: ${cleanTitle(title)}`;
+}
+
+
+/* =====================================================
+   TEST RESULT API
+===================================================== */
+
+function recordTestResult(questionResults) {
+    if (!Array.isArray(questionResults)) return;
+
+    questionResults.forEach(result => {
+        const type = result.type || "Other";
+
+        if (!state.weaknesses[type]) {
+            state.weaknesses[type] = {
+                errors: 0,
+                total: 0
+            };
+        }
+
+        state.weaknesses[type].total++;
+
+        if (!result.correct) {
+            state.weaknesses[type].errors++;
+        }
+    });
+
+    saveWeaknesses();
+    renderAnalytics();
+}
+
+
+/* =====================================================
+   RECEIVE RESULT FROM IFRAME
+===================================================== */
+
+window.addEventListener("message", event => {
+    if (!event.data || event.data.type !== "AIOS_TEST_RESULT") {
+        return;
+    }
+
+    console.log("AIOS TEST RESULT:", event.data);
+    recordTestResult(event.data.results || []);
+});
+
+
+/* =====================================================
+   WEAKNESS ANALYTICS
 ===================================================== */
 
 function renderAnalytics() {
+    const list = document.getElementById("weakness-list");
+    const badge = document.getElementById("weakness-summary");
+    const ai = document.getElementById("ai-recommendation");
 
-    const listEl =
-        document.getElementById(
-            "weakness-list"
-        );
+    if (!list) return;
 
-    const aiEl =
-        document.getElementById(
-            "ai-recommendation"
-        );
+    list.innerHTML = "";
 
-    const summaryBadge =
-        document.getElementById(
-            "weakness-summary"
-        );
+    const weaknesses = state.weaknesses || {};
+    const types = Object.keys(weaknesses);
 
-
-    if (!listEl) return;
-
-
-    listEl.innerHTML = "";
-
-
-    const weaknesses =
-        state.weaknesses;
-
-
-    const keys =
-        Object.keys(weaknesses);
-
-
-    if (!keys.length) {
-
-        listEl.innerHTML = `
+    if (!types.length) {
+        list.innerHTML = `
             <div class="weakness-item">
-
-                <strong>
-                    ?? Hozircha weakness yo'q
-                </strong>
-
-                <p>
-                    Reading testini bajarganingizdan
-                    keyin AIOS real statistikani
-                    ko'rsatadi.
-                </p>
-
+                <strong>?? Hozircha statistika yo‘q</strong>
+                <p>Reading testini bajaring. Natija savol turi bo‘yicha avtomatik saqlanadi.</p>
             </div>
         `;
 
+        if (badge) badge.innerText = "0 Weak Points";
 
-        if (summaryBadge) {
-            summaryBadge.innerText =
-                "0 Weak Points";
-        }
-
-
-        if (aiEl) {
-
-            aiEl.innerHTML = `
-                <strong>
-                    ?? AIOS:
-                </strong>
-
-                <br><br>
-
-                Birinchi Reading testini
-                bajaring. Keyin AIOS
-                xatolarni savol turi bo'yicha
-                tahlil qiladi.
+        if (ai) {
+            ai.innerHTML = `
+                ?? <strong>AIOS:</strong><br><br>
+                Birinchi Reading testini bajaring. Keyin AIOS weaknesslarni aniqlaydi.
             `;
-
         }
 
         return;
-
     }
 
+    let weakCount = 0;
 
-    let weaknessCount = 0;
+    types.forEach(type => {
+        const data = weaknesses[type];
+        const errors = Number(data.errors || 0);
+        const total = Number(data.total || 0);
 
+        if (!total) return;
 
-    keys.forEach(type => {
+        const rate = Math.round((errors / total) * 100);
 
-        const data =
-            weaknesses[type];
+        if (rate >= 30) {
+            weakCount++;
+        }
 
-
-        const rate =
-            data.total > 0
-                ? Math.round(
-                    data.errors /
-                    data.total *
-                    100
-                )
-                : 0;
-
-
-        if (rate < 30) return;
-
-
-        weaknessCount++;
-
-
-        const item =
-            document.createElement(
-                "div"
-            );
-
-
-        item.className =
-            "weakness-item";
-
+        const item = document.createElement("div");
+        item.className = "weakness-item";
 
         item.innerHTML = `
-
             <div class="weakness-header">
-
-                <strong>
-                    ${escapeHtml(type)}
-                </strong>
-
-                <span class="error-rate">
-                    ${rate}% Error Rate
-                </span>
-
+                <strong>?? ${escapeHtml(type)}</strong>
+                <span class="error-rate">${rate}% xato</span>
             </div>
 
             <div class="progress-bar">
-
-                <div
-                    class="progress-fill"
-                    style="width:${rate}%">
-                </div>
-
+                <div class="progress-fill" style="width:${Math.min(rate, 100)}%"></div>
             </div>
 
-            <p class="weakness-sub">
-
-                ${data.errors}
-                /
-                ${data.total}
-                ta xato
-
-            </p>
-
+            <p class="weakness-sub">${errors} xato / ${total} savol</p>
         `;
 
-
-        listEl.appendChild(item);
-
+        list.appendChild(item);
     });
 
-
-    if (summaryBadge) {
-
-        summaryBadge.innerText =
-            `${weaknessCount} Weak Points`;
-
+    if (badge) {
+        badge.innerText = `${weakCount} Weak Points`;
     }
 
+    const weakest = types
+        .map(type => {
+            const data = weaknesses[type];
+            const total = Number(data.total || 0);
+            const errors = Number(data.errors || 0);
+            return {
+                type,
+                rate: total ? (errors / total) * 100 : 0
+            };
+        })
+        .sort((a, b) => b.rate - a.rate)[0];
 
-    if (aiEl && weaknessCount) {
-
-        aiEl.innerHTML = `
-            <strong>
-                ?? AIOS aniqladi:
-            </strong>
-
-            <br><br>
-
-            Sizda ayrim Reading question
-            type'larida xatolar yuqori.
-
-            <br><br>
-
-            ?? AIOS keyingi bosqichda
-            aynan shu savol turlariga
-            mos challenge beradi.
+    if (ai && weakest && weakest.rate >= 30) {
+        ai.innerHTML = `
+            ?? <strong>AIOS Recommendation</strong><br><br>
+            Eng katta weakness: <strong>${escapeHtml(weakest.type)}</strong> — ${Math.round(weakest.rate)}% xato.<br><br>
+            ?? Keyingi challenge shu question type'ga moslanadi.
         `;
-
+    } else if (ai) {
+        ai.innerHTML = `
+            ? Hozircha jiddiy weakness aniqlanmadi.<br><br>
+            AIOS keyingi testlar orqali statistikani aniqlashtiradi.
+        `;
     }
-
 }
 
 
@@ -1211,30 +530,18 @@ function renderAnalytics() {
 ===================================================== */
 
 function cleanTitle(title) {
-
     if (!title) return "IELTS Reading";
-
-    return title
-        .replace(/^IELTS Reading\s*-\s*/i, "")
-        .trim();
-
+    return title.replace(/^IELTS Reading\s*-\s*/i, "").trim();
 }
 
-
 function escapeHtml(text) {
-
-    if (text === undefined ||
-        text === null) {
-        return "";
-    }
-
+    if (text === undefined || text === null) return "";
     return String(text)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-
 }
 
 
@@ -1242,13 +549,9 @@ function escapeHtml(text) {
    START
 ===================================================== */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        loadContentBank();
-
-        renderAnalytics();
-
-    }
-);
+document.addEventListener("DOMContentLoaded", () => {
+    loadWeaknesses();
+    loadContentBank();
+    renderAnalytics();
+    updateBackButton();
+});
