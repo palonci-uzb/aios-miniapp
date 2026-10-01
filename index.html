@@ -3,52 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIOS IELTS Practice</title>
+    <title>AIOS IELTS Learning OS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app">
-        <!-- Bosh menyu / Dashboard -->
+        <!-- 1. BOSH DASHBOARD -->
         <div id="main-dashboard" class="container">
             <header class="header">
                 <h2>?? AIOS IELTS Learning OS</h2>
-                <p>Amaliyot bo'limini tanlang:</p>
+                <p class="subtitle">Adaptive AI-Driven Training Platform</p>
             </header>
 
             <div class="card-grid">
-                <div class="card" onclick="showReadingList()">
-                    <h3>?? Reading Practice</h3>
-                    <p>3 ta tayyor passage mavjud</p>
+                <div class="card primary-card" onclick="showSection('reading-hub')">
+                    <h3>?? Reading Content Engine</h3>
+                    <p>Full Practice & Question Type Training</p>
+                    <span class="badge">3 Passages Loaded</span>
                 </div>
+
+                <div class="card weakness-card" onclick="showSection('weakness-analytics')">
+                    <h3>?? Weakness Analytics</h3>
+                    <p>Real-time skill gaps & error analysis</p>
+                    <span class="badge alert" id="weakness-summary">0 Weak Points</span>
+                </div>
+
                 <div class="card disabled">
                     <h3>?? Listening Practice</h3>
+                    <p>Tez kunda...</p>
+                </div>
+
+                <div class="card disabled">
+                    <h3>?? Writing Engine</h3>
                     <p>Tez kunda...</p>
                 </div>
             </div>
         </div>
 
-        <!-- Reading Testlar Ro'yxati -->
-        <div id="reading-list" class="container hidden">
-            <button class="back-btn" onclick="showDashboard()">?? Orqaga</button>
-            <h2>?? IELTS Reading Passages</h2>
-            <div class="test-list">
-                <button class="test-btn" onclick="openTest('practise reading/Passage 1-A Brief History of Humans and Food.html')">
-                    <strong>Passage 1:</strong> A Brief History of Humans and Food
-                </button>
-                <button class="test-btn" onclick="openTest('practise reading/Passage 3-A new stage in the study and teaching of history.html')">
-                    <strong>Passage 3:</strong> A new stage in the study and teaching of history
-                </button>
-                <button class="test-btn" onclick="openTest('practise reading/Passage 3-Crossing the Threshold.html')">
-                    <strong>Passage 3:</strong> Crossing the Threshold
-                </button>
+        <!-- 2. READING CONTENT HUB -->
+        <div id="reading-hub" class="container hidden">
+            <button class="back-btn" onclick="showSection('main-dashboard')">?? Dashboard</button>
+            <h2>?? Reading Content Engine</h2>
+            
+            <div class="tab-navigation">
+                <button class="tab-btn active" id="tab-full" onclick="switchReadingTab('full')">?? Full Practice Sets</button>
+                <button class="tab-btn" id="tab-types" onclick="switchReadingTab('types')">?? Question Types</button>
+            </div>
+
+            <!-- Full Practice Tab -->
+            <div id="full-practice-tab" class="tab-content">
+                <p class="section-desc">Original tartibdagi IELTS Reading passage'lar:</p>
+                <div class="test-list">
+                    <button class="test-btn" onclick="openTest('practise reading/Passage 1-A Brief History of Humans and Food.html', 'Passage 1', 'Full Practice')">
+                        <div class="test-info">
+                            <strong>Passage 1:</strong> A Brief History of Humans and Food
+                            <span class="sub-info">Questions: TFNG, Sentence Completion</span>
+                        </div>
+                    </button>
+                    <button class="test-btn" onclick="openTest('practise reading/Passage 3-A new stage in the study and teaching of history.html', 'Passage 3', 'Full Practice')">
+                        <div class="test-info">
+                            <strong>Passage 3:</strong> A new stage in the study and teaching of history
+                            <span class="sub-info">Questions: Matching Headings, MCQ</span>
+                        </div>
+                    </button>
+                    <button class="test-btn" onclick="openTest('practise reading/Passage 3-Crossing the Threshold.html', 'Passage 3', 'Full Practice')">
+                        <div class="test-info">
+                            <strong>Passage 3:</strong> Crossing the Threshold
+                            <span class="sub-info">Questions: Summary Completion, TFNG</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Types Tab -->
+            <div id="question-types-tab" class="tab-content hidden">
+                <p class="section-desc">Barcha passage'lardan savol turlari bo'yicha ajratilgan bank:</p>
+                <div class="qtype-grid">
+                    <div class="qtype-card" onclick="filterByQType('TFNG')">
+                        <h4>TFNG / YNNG</h4>
+                        <p>True / False / Not Given</p>
+                        <span class="tag">Weakness Focus</span>
+                    </div>
+                    <div class="qtype-card" onclick="filterByQType('MCQ')">
+                        <h4>Multiple Choice</h4>
+                        <p>MCQ Questions</p>
+                        <span class="tag success">High Accuracy</span>
+                    </div>
+                    <div class="qtype-card" onclick="filterByQType('Matching Headings')">
+                        <h4>Matching Headings</h4>
+                        <p>Headings & Information</p>
+                        <span class="tag alert">Critical Weakness</span>
+                    </div>
+                    <div class="qtype-card" onclick="filterByQType('Completion')">
+                        <h4>Completion Tasks</h4>
+                        <p>Summary & Sentence Completion</p>
+                        <span class="tag">Medium</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Test ko'rish oynasi (iframe) -->
+        <!-- 3. WEAKNESS ANALYTICS DASHBOARD -->
+        <div id="weakness-analytics" class="container hidden">
+            <button class="back-btn" onclick="showSection('main-dashboard')">?? Dashboard</button>
+            <h2>?? Adaptive Weakness Matrix</h2>
+            <p class="section-desc">AIOS sizning xatolaringiz va zaif nuqtalaringizni avtomatik tahlil qiladi:</p>
+
+            <div class="analytics-card">
+                <h3>?? Active Weaknesses Detected</h3>
+                <div id="weakness-list" class="weakness-list">
+                    <!-- Dynamic Weakness Items -->
+                </div>
+            </div>
+
+            <div class="analytics-card">
+                <h3>?? AI Engine Recommendation</h3>
+                <div id="ai-recommendation" class="ai-box">
+                    Hozircha yetarli test ma'lumotlari mavjud emas. Birinchi Reading testini yeching!
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. TEST PLAYER (IFRAME) -->
         <div id="test-view" class="container hidden">
             <div class="top-bar">
-                <button class="back-btn" onclick="showReadingList()">?? Testlar ro'yxatiga qaytish</button>
+                <button class="back-btn" onclick="showSection('reading-hub')">?? Passage'larga qaytish</button>
+                <span id="active-test-title" class="active-title">IELTS Test</span>
             </div>
             <iframe id="test-frame" src="" frameborder="0"></iframe>
         </div>
