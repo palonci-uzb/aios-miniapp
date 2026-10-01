@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIOS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <div class="logo">?? AIOS</div>
+        <div class="subtitle">IELTS 8.0 Learning OS</div>
+      </div>
+      <div class="level" id="level">LVL 1</div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-title">Your mission starts here.</div>
+      <div class="hero-text">Learn. Play. Improve. Become harder to defeat.</div>
+      <div class="stats">
+        <div class="stat">
+          <span>?</span>
+          <b id="xp">0</b>
+          <small>XP</small>
+        </div>
+        <div class="stat">
+          <span>??</span>
+          <b id="rep">0</b>
+          <small>REPUTATION</small>
+        </div>
+        <div class="stat">
+          <span>??</span>
+          <b id="streak">1</b>
+          <small>STREAK</small>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-title">? Choose your mode</div>
+    <div class="menu-grid">
+      <button class="menu-card practice" id="practiceBtn">
+        <span class="icon">??</span>
+        <div>
+          <strong>PRACTICE</strong>
+          <small>Train your IELTS skills</small>
+        </div>
+      </button>
+
+      <button class="menu-card games" id="gamesBtn">
+        <span class="icon">??</span>
+        <div>
+          <strong>GAMES</strong>
+          <small>Turn weaknesses into XP</small>
+        </div>
+      </button>
+
+      <button class="menu-card memory" id="memoryBtn">
+        <span class="icon">??</span>
+        <div>
+          <strong>MEMORY</strong>
+          <small>Review what you learned</small>
+        </div>
+      </button>
+
+      <button class="menu-card progress" id="progressBtn">
+        <span class="icon">??</span>
+        <div>
+          <strong>PROGRESS</strong>
+          <small>Track your evolution</small>
+        </div>
+      </button>
+    </div>
+
+    <section class="mission">
+      <div class="mission-top">
+        <span>?? TODAY'S MISSION</span>
+        <span id="missionProgress">0/3</span>
+      </div>
+      <h2 id="missionTitle">Activate your first mission</h2>
+      <p id="missionText">Complete a Practice or Game challenge to start building your reputation.</p>
+      <button class="primary" id="missionBtn">START MISSION ›</button>
+    </section>
+
+    <section class="screen hidden" id="screen"></section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

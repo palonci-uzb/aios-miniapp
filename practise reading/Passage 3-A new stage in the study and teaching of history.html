@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IELTS Reading Test - History and Moving Images</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {margin: 0;padding: 0;font-family: 'Inter', 'Segoe UI', Arial, sans-serif;background: radial-gradient(1200px 600px at 10% 0%, #e0f2fe, transparent),radial-gradient(1200px 600px at 90% 100%, #dbeafe, transparent),#f0f9ff;overflow: hidden;color: #1e293b;}
+    .test-wrapper {display: flex;flex-direction: column;height: 100vh;}
+    .test-container {display: flex;flex: 1;overflow: hidden;}
+    .header {background: #ffffff;border-bottom: 1px solid #d1d5db;padding: 1rem 2rem;display: flex;justify-content: space-between;align-items: center;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);}
+    .header__logo img {height: 48px;transition: transform 0.3s ease;}
+    .header__logo img:hover {transform: scale(1.1);}
+    .header__timer {font-size: 1.25rem;font-weight: 600;color: #2563eb;background: #eff6ff;padding: 0.5rem 1.5rem;border-radius: 9999px;border: 1px solid #3b82f6;transition: all 0.3s ease;}
+    .header__icons {display: flex;gap: 1.5rem;}
+    .header__icon {font-size: 1.5rem;color: #4b5563;cursor: pointer;transition: all 0.3s ease;}
+    .header__icon:hover {color: #2563eb;transform: scale(1.15);}
+    .settings-modal {display: none;position: fixed;inset: 0;background: rgba(0, 0, 0, 0.75);z-index: 1000;justify-content: center;align-items: center;}
+    .settings-content {background: #ffffff;width: 90%;max-width: 32rem;border-radius: 1rem;box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);animation: slideIn 0.4s ease-out;}
+    @keyframes slideIn {from { transform: translateY(-3rem); opacity: 0; }to { transform: translateY(0); opacity: 1; }}
+    .settings-header {display: flex;justify-content: space-between;align-items: center;padding: 1rem 2rem;background: linear-gradient(90deg, #3b82f6, #1e40af);color: #ffffff;}
+    .settings-header h2 {margin: 0;font-size: 1.25rem;}
+    .settings-close {background: none;border: none;font-size: 1.75rem;cursor: pointer;color: #ffffff;transition: color 0.3s ease;}
+    .settings-close:hover {color: #fed7e2;}
+    .settings-body {padding: 1.5rem;background: #f9fafb;}
+    .settings-option {display: flex;align-items: center;padding: 1rem 0;border-bottom: 1px solid #e5e7eb;cursor: pointer;transition: background 0.2s ease;}
+    .settings-option:hover {background: #eff6ff;}
+    .settings-option:last-child {border-bottom: none;}
+    .settings-option i {margin-right: 0.75rem;width: 1.25rem;text-align: center;color: #2563eb;}
+    .settings-option span {font-size: 1.1rem;}
+    .sectionRubric {margin: 1.5rem;padding: 1.25rem;background: #ffffff;border: 1px solid #d1d5db;border-radius: 0.75rem;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);}
+    .sectionRubric h2 {font-size: 1.25rem;color: #2563eb;margin-bottom: 0.5rem;}
+    .passage-container {width: 45%;height: 100%;overflow-y: auto;padding: 1.5rem;box-sizing: border-box;background: #f9fafb;border-right: 1px solid #d1d5db;position: relative;user-select: text;-webkit-user-select: text;}
+    .passage-container::-webkit-scrollbar {width: 8px;}
+    .passage-container::-webkit-scrollbar-track {background: #e5e7eb;}
+    .passage-container::-webkit-scrollbar-thumb {background: #6b7280;border-radius: 4px;}
+    .questions-container {flex: 1;height: 100%;overflow-y: auto;padding: 1.5rem;box-sizing: border-box;background: #f9fafb;user-select: text;-webkit-user-select: text;position: relative;}
+    .questions-container::-webkit-scrollbar {width: 8px;}
+    .questions-container::-webkit-scrollbar-track {background: #e5e7eb;}
+    .questions-container::-webkit-scrollbar-thumb {background: #6b7280;border-radius: 4px;}
+    .highlight {border-radius: 0.25rem;padding: 0 0.25rem;}
+    .highlight.yellow { background: rgba(254, 243, 199, 0.5); }
+    .highlight.green { background: rgba(187, 247, 208, 0.5); }
+    .highlight.pink { background: rgba(251, 207, 232, 0.5); }
+    .highlight.blue { background: rgba(191, 219, 254, 0.5); }
+    .highlight-toolbar {position: fixed;background: #ffffff;border: 1px solid #d1d5db;border-radius: 0.5rem;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);display: none;z-index: 1000;padding: 0.5rem;transform: translate(-50%, -100%);margin-top: -0.5rem;}
+    .highlight-toolbar button {background: none;border: none;width: 2rem;height: 2rem;cursor: pointer;border-radius: 0.25rem;transition: all 0.2s ease;}
+    .highlight-toolbar button:hover {background: #eff6ff;transform: scale(1.1);}
+    .highlight-toolbar button.remove {color: #ef4444;}
+    .divider {width: 14px;background: #e5e7eb;cursor: col-resize;position: relative;}
+    .divider-handle {width: 6px;height: 60px;background: #6b7280;border-radius: 4px;position: absolute;top: 50%;left: 4px;transform: translateY(-50%);}
+    .question {margin-bottom: 2rem;background: #ffffff;padding: 1.5rem;border-radius: 0.75rem;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);transition: transform 0.2s ease;}
+    .question:hover {transform: translateY(-2px);}
+    .question-rubric {margin-bottom: 1.5rem;font-weight: 600;color: #1f2937;}
+    .question-rubric h3 {margin: 0 0 0.5rem;color: #2563eb;}
+    .question-rubric p {margin: 0.25rem 0;color: #4b5563;}
+    .question-number {font-weight: 700;color: #2563eb;}
+    .footer {background: #ffffff;border-top: 1px solid #d1d5db;padding: 1.25rem;box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.05);}
+    .nav-row {display: flex;align-items: center;justify-content: space-between;}
+    .footer__questionWrapper {display: flex;align-items: center;}
+    .footer__subquestionWrapper {display: flex;flex-wrap: wrap;margin-left: 1.25rem;}
+    .subQuestion {width: 2.5rem;height: 2.5rem;border-radius: 50%;border: 1px solid #d1d5db;background: #f3f4f6;margin: 0.25rem;cursor: pointer;display: flex;align-items: center;justify-content: center;color: #4b5563;font-weight: 600;transition: all 0.3s ease;}
+    .subQuestion.active {background: #2563eb;color: #ffffff;border-color: #2563eb;}
+    .subQuestion.attempted {background: #60a5fa;color: #ffffff;}
+    .footer__deliverButton {background: #2563eb;color: #ffffff;border: none;padding: 0.75rem 1.5rem;border-radius: 0.5rem;cursor: pointer;font-weight: 600;transition: all 0.3s ease;}
+    .footer__deliverButton:hover {background: #1e40af;transform: translateY(-2px);}
+    .footer__deliverButton:disabled {background: #d1d5db;cursor: not-allowed;}
+    .submission-modal {display: none;position: fixed;inset: 0;background: rgba(0, 0, 0, 0.8);z-index: 2000;justify-content: center;align-items: center;}
+    .submission-content {background: #ffffff;width: 90%;max-width: 48rem;border-radius: 1rem;padding: 2rem;box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);max-height: 90vh;overflow-y: auto;}
+    .submission-content h2 {margin-top: 0;color: #2563eb;border-bottom: 2px solid #2563eb;padding-bottom: 0.75rem;font-size: 1.75rem;}
+    .submission-content p {margin-bottom: 1.5rem;color: #4b5563;font-size: 1.1rem;}
+    .answers-section {margin-top: 1.5rem;}
+    .answers-section h3 {color: #2563eb;margin-bottom: 1.25rem;font-size: 1.25rem;}
+    .answer-item {padding: 0.75rem;margin-bottom: 0.5rem;border-radius: 0.5rem;border-left: 6px solid #d1d5db;background: #f9fafb;}
+    .answer-item.correct {border-left-color: #10b981;background: #ecfdf5;}
+    .answer-item.incorrect {border-left-color: #ef4444;background: #fef2f2;}
+    .answer-text {font-weight: 600;}
+    .correct-answer {color: #10b981;margin-left: 0.75rem;}
+    .incorrect-answer {color: #ef4444;margin-left: 0.75rem;}
+    .answer-status {float: right;margin-left: 1rem;}
+    .correct-status {color: #10b981;}
+    .incorrect-status {color: #ef4444;}
+    .submission-buttons {margin-top: 1.5rem;text-align: right;}
+    .submission-buttons button {padding: 0.75rem 1.5rem;margin-left: 1rem;border-radius: 0.5rem;cursor: pointer;font-weight: 600;}
+    .submission-buttons .confirm {background: #2563eb;color: #ffffff;border: none;}
+    .submission-buttons .confirm:hover {background: #1e40af;transform: translateY(-2px);}
+    .score-display {text-align: center;margin-bottom: 1.5rem;padding: 1.5rem;background: #eff6ff;border-radius: 0.75rem;}
+    .score-number {font-size: 3rem;font-weight: bold;color: #2563eb;margin: 0.75rem 0;}
+    .score-total {font-size: 1.25rem;color: #4b5563;}
+    .performance-rating {font-size: 1.25rem;font-weight: bold;margin: 1.25rem 0;padding: 0.75rem;border-radius: 0.5rem;}
+    .excellent { color: #065f46; background: #ecfdf5; }
+    .very-good { color: #047857; background: #ecfdf5; }
+    .good { color: #34d399; background: #ecfdf5; }
+    .fair { color: #d97706; background: #fefce8; }
+    .poor { color: #dc2626; background: #fef2f2; }
+    .band-score {font-size: 2rem;font-weight: bold;color: #2563eb;margin: 0.75rem 0;}
+    .highlight-color {width: 1.75rem;height: 1.75rem;border-radius: 50%;border: 1px solid #d1d5db;cursor: pointer;transition: transform 0.2s ease;}
+    .highlight-color:hover {transform: scale(1.2);}
+    .highlight-color.yellow { background: #fef3c7; }
+    .highlight-color.green { background: #bbf7d0; }
+    .highlight-color.pink { background: #fbcfe8; }
+    .highlight-color.blue { background: #bfdbfe; }
+    #passageContent {line-height: 1.6;font-size: 1.05rem;}
+    #passageContent h2 {margin: 1.5rem 0 1rem 0;line-height: 1.4;}
+    #passageContent p {margin: 1.2rem 0;text-align: justify;line-height: 1.7;}
+    #passageContent p:first-of-type {margin-top: 1rem;}
+  </style>
+</head>
+<body>
+<div class="test-wrapper">
+  <header class="header">
+    <div class="flex items-center">
+      <img src="https://d2snzxottmona5.cloudfront.net/releases/3.46.0/images/logo/ielts.svg" alt="IELTS Logo" class="h-12 transition-transform hover:scale-110">
+    </div>
+    <div class="flex-1 flex justify-center">
+      <a href="https://t.me/jasurbekisaev" target="_blank" class="flex items-center gap-3 text-blue-700 hover:text-blue-900 font-semibold text-xl transition-all hover:scale-105">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-.38.24-1.07.7-.96.66-1.89 1.28-1.89 1.28s-.17.11-.49.03c-.32-.08-.72-.26-1.16-.47-.54-.26-1.17-.53-1.17-.53s-.87-.55.62-1.14c.32-.13 1.96-.84 2.99-1.2 1.05-.37 2.86-1.01 2.86-1.01s1.02-.4 1.02 0z"/>
+        </svg>
+        Jasurbek’s blog
+      </a>
+    </div>
+    <div class="header__timer" id="testTimer">00:00</div>
+    <div class="header__icons">
+      <i class="fas fa-adjust header__icon" id="contrastToggle" title="Dark mode"></i>
+      <i class="fas fa-text-height header__icon" id="textSizeToggle" title="Text size"></i>
+      <i class="fas fa-circle-question header__icon" title="Tips" onclick="alert('Complete Paragraph matching (27-35), YES/NO/NOT GIVEN (36-40). Use highlighter by selecting text.')"></i>
+    </div>
+  </header>
+
+  <div class="settings-modal" id="settingsModal">
+    <div class="settings-content">
+      <div class="settings-header">
+        <h2>Options</h2>
+        <button class="settings-close" id="settingsClose">×</button>
+      </div>
+      <div class="settings-body">
+        <div class="settings-option" id="contrastOption"><i class="fas fa-adjust"></i><span>Dark mode</span></div>
+        <div class="settings-option" id="textSizeOption"><i class="fas fa-text-height"></i><span>Text size</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-container">
+    <div class="passage-container" id="passage-container">
+      <div class="sectionRubric">
+        <h2>Reading Passage 3</h2>
+        <p>You should spend about 20 minutes on Questions 27-40, which are based on Reading Passage 3 below.</p>
+      </div>
+      <div class="highlight-toolbar" id="highlightToolbar">
+        <button class="highlight-color yellow" data-color="yellow" title="Yellow highlight"></button>
+        <button class="highlight-color green" data-color="green" title="Green highlight"></button>
+        <button class="highlight-color pink" data-color="pink" title="Pink highlight"></button>
+        <button class="highlight-color blue" data-color="blue" title="Blue highlight"></button>
+        <button class="remove" title="Remove highlight"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="passageContent">
+        <h2 class="text-center text-xl font-bold text-gray-800">A new stage in the study and teaching of history</h2>
+        <p>For hundreds of years, historians have relied on written or printed documents to provide the bulk of their source materials, and they have largely communicated with students and the wider public by writing books and journal articles. Today, however, the printed word is being superseded by a diversity of forms of communication, above all moving images on video or film.</p>
+        <p>The development of this new form of communication is leading to a growing gap between the practice of professional historians based in academia, and the practice of those aiming to popularise the study of history among the general public, and to encourage people to create their own records for the future. On the one hand, there are mainstream academics who continue to use only the written word as they examine more and more fields with an ever increasing number of sophisticated methodologies. On the other hand, film and video, especially as broadcast on television, are probably the major influence on the public’s consciousness of history, as they see film of events of fifty or a hundred years ago, events they had previously only read about. In a related development, a great many people now document local and family events in the form of videos; many schools, too, produce video yearbooks. All these visual records may well prove to be invaluable sources of information for future historians.</p>
+        <p>The glaring contradiction is that the two approaches – the academic and what we might term the popular – have intersected very little: with a few notable exceptions, professional historians have tended to avoid involvement in television programmes about history, and have even less impact on what is being captured and preserved on video. And the potential of moving images has wielded negligible influence on the academic study of history. This gulf can be seen as resulting from the willingness or otherwise of individual historians to accept the validity of new forms of communication in the study of history.</p>
+        <p>This is not the first time that the question has arisen. The study of history, as conceived of today, began with the transition from oral to literate culture, leading to the earliest written records and the earliest historical studies. The next great shift came with the advent of printing, which transformed everything. Today, as the printed word loses its dominance, historians are faced with a variety of forms of communication, ranging from simple audiotape to the promising complexities of videodiscs linked with computers. As yet, however, the use of moving images to record current events for the benefit of future historians does not even have a commonly agreed name.</p>
+        <p>This does not mean that mainstream historians have totally rejected the use of moving images as sources: the majority seem intrigued by the idea, and valuable research has been carried out into the history and analysis of films with a broad circulation, using them as a source of information on the social and intellectual history of the twentieth century. Journals such as American History Review have played a significant role in this field. Yet the number of historians using moving images in their research or teaching is very small. The barrier seems to be that the profession is structured around the medium of the written word, and is somewhat insulated in its academic setting. The use of moving images presents a substantial challenge to this setting and its assumptions. As a result, historians have rejected the training, the institutions, the motivations and the professional structures that would be needed in order to use moving images effectively. Above all, they have rejected the necessity to learn complicated new skills.</p>
+        <p>So why should historians make this change? Clearly, film or videos of events and people can be used as solid evidence of the past, linked to the words of the narrator (whether a television presenter/historian or a university teacher giving a lecture) but carrying information in their own right. Film has reintroduced the oral form as a mode of research and communication for documenting historical events. Now, with moving images, people are reminded that oral communication is not limited to words: it also includes body language, expression and tone, and is embedded in a context. Little of this is evident in a written transcript.</p>
+        <p>A further effect of video and film is that the narrator gives up some control and has less need to give explanations, while the viewer becomes involved in the process of interpreting and understanding history. Film or videotape can also aid historians by simplifying the work of the interviewer. Instead of trying to carry on an interview while simultaneously making notes about setting and other unspoken data, this new kind of historian can concentrate on the interview itself, and study the film later. The many benefits of using moving images as historical evidence easily outweigh worries about cost, technical skills, or the effect of a camera on a person telling his or her story. Moving images enhance the quality of historical research, and suggest new directions for historians to explore.</p>
+      </div>
+    </div>
+
+    <div class="divider" id="divider"><div class="divider-handle"></div></div>
+
+    <div class="questions-container" id="questions-container">
+
+      <div class="question">
+        <div class="question-rubric">
+          <h3>Questions 27–35</h3>
+          <p>Reading Passage 3 has seven paragraphs, A-G.<br>Which paragraph contains the following information?<br>Write the correct letter, A-G, in boxes 27-35 on your answer sheet.<br>NB You may use any letter more than once.</p>
+        </div>
+        <div class="question-content">
+          <div class="yes-no-option"><p><span class="question-number">27</span> an overview of the range of methods that have been used over time to document history</p><select name="q27"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">28</span> the main reason why many historians are unwilling to use films in their work</p><select name="q28"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">29</span> a reference to some differences between oral and written communication</p><select name="q29"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">30</span> how most citizens today gain an understanding of history</p><select name="q30"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">31</span> how current student events are sometimes captured for future audiences</p><select name="q31"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">32</span> mention of the fact that the advantages of film are greater than the disadvantages</p><select name="q32"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">33</span> the claim that there is no official title for film-based historical work</p><select name="q33"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">34</span> reference to the active role the audience plays when watching films</p><select name="q34"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">35</span> a list of requirements that historians see as obstacles to their use of film to record history</p><select name="q35"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-rubric">
+          <h3>Questions 36–40</h3>
+          <p>Do the following statements agree with the claims of the writer in Reading Passage 3?<br>In boxes 36-40 on your answer sheet, write<br>YES if the statement reflects the claims of the writer<br>NO if the statement contradicts the claims of the writer<br>NOT GIVEN if it is impossible to say what the writer thinks about this</p>
+        </div>
+        <div class="question-content">
+          <div class="yes-no-option"><p><span class="question-number">36</span> The needs of students in school have led to improvements in the teaching of history.</p><select name="q36"><option value="">--</option><option value="YES">YES</option><option value="NO">NO</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">37</span> Academic and popular historians have different attitudes towards the value of innovations in communication.</p><select name="q37"><option value="">--</option><option value="YES">YES</option><option value="NO">NO</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">38</span> It is common for historians to play a major role in creating historical documentaries for television.</p><select name="q38"><option value="">--</option><option value="YES">YES</option><option value="NO">NO</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">39</span> Articles in American History Review have explored aspects of modern history through popular films.</p><select name="q39"><option value="">--</option><option value="YES">YES</option><option value="NO">NO</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">40</span> Developments in technology are influencing a range of academic subjects.</p><select name="q40"><option value="">--</option><option value="YES">YES</option><option value="NO">NO</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <nav class="nav-row">
+      <div class="footer__questionWrapper">
+        <div class="footer__subquestionWrapper">
+          <button class="subQuestion" data-ordernumber="27"><span>27</span></button>
+          <button class="subQuestion" data-ordernumber="28"><span>28</span></button>
+          <button class="subQuestion" data-ordernumber="29"><span>29</span></button>
+          <button class="subQuestion" data-ordernumber="30"><span>30</span></button>
+          <button class="subQuestion" data-ordernumber="31"><span>31</span></button>
+          <button class="subQuestion" data-ordernumber="32"><span>32</span></button>
+          <button class="subQuestion" data-ordernumber="33"><span>33</span></button>
+          <button class="subQuestion" data-ordernumber="34"><span>34</span></button>
+          <button class="subQuestion" data-ordernumber="35"><span>35</span></button>
+          <button class="subQuestion" data-ordernumber="36"><span>36</span></button>
+          <button class="subQuestion" data-ordernumber="37"><span>37</span></button>
+          <button class="subQuestion" data-ordernumber="38"><span>38</span></button>
+          <button class="subQuestion" data-ordernumber="39"><span>39</span></button>
+          <button class="subQuestion" data-ordernumber="40"><span>40</span></button>
+        </div>
+      </div>
+      <button id="deliver-button" class="footer__deliverButton"><i class="fas fa-check"></i> Submit</button>
+    </nav>
+  </footer>
+</div>
+
+<div class="submission-modal" id="submissionModal">
+  <div class="submission-content">
+    <h2 id="submissionTitle">Test Results</h2>
+    <div class="score-display">
+      <div>Your Score:</div>
+      <div class="score-number" id="userScore">0</div>
+      <div class="score-total">out of <span id="totalQuestions">14</span></div>
+      <div class="band-score" id="bandScore">Band: 0.0</div>
+      <div class="performance-rating" id="performanceRating">Poor - Needs Improvement</div>
+    </div>
+    <div class="time-spent" id="timeSpent"></div>
+    <p id="submissionMessage">Here are your answers with the correct solutions:</p>
+    <div class="answers-section">
+      <h3>Your Answers:</h3>
+      <div id="answersList"></div>
+    </div>
+    <div class="submission-buttons">
+      <button class="confirm" id="closeSubmission">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const correctAnswers = {
+  27: "D",
+  28: "F",
+  29: "G",
+  30: "B",
+  31: "C",
+  32: "G",
+  33: "D",
+  34: "G",
+  35: "F",
+  36: "NOT GIVEN",
+  37: "YES",
+  38: "NO",
+  39: "YES",
+  40: "YES"
+};
+
+const answerExplanations = {
+  27: "D – discusses transition from oral to literate, then printing, now moving images.",
+  28: "F – profession structured around written word; historians reject new skills/training.",
+  29: "G – oral includes body language, expression, tone, context – not in written transcript.",
+  30: "B – film and video (TV) major influence on public’s consciousness of history.",
+  31: "C – people document events in videos; schools produce video yearbooks.",
+  32: "G – benefits of moving images outweigh worries about cost, skills, camera effect.",
+  33: "D – use of moving images to record events has no commonly agreed name.",
+  34: "G – viewer becomes involved in interpreting and understanding history.",
+  35: "F – rejected training, institutions, motivations, professional structures, new skills.",
+  36: "NOT GIVEN – no mention of school students' needs leading to improvements.",
+  37: "YES – growing gap; academics vs popularisers have different approaches.",
+  38: "NO – professional historians avoid involvement in TV programmes.",
+  39: "YES – American History Review played role in using films for 20th century history.",
+  40: "YES – passage implies technology (moving images, videodiscs, computers) affects history study."
+};
+
+let totalSeconds = 0;
+const timerElement = document.getElementById('testTimer');
+let testSubmitted = false;
+let userAnswers = {};
+let startTime = new Date();
+let resultsShown = false;
+
+function updateTimer() {
+  if (testSubmitted) return;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  totalSeconds++;
+}
+const timerInterval = setInterval(updateTimer, 1000);
+
+function disableAllInputs() {
+  document.querySelectorAll('select, input[type="text"]').forEach(input => input.disabled = true);
+  document.getElementById('deliver-button').disabled = true;
+}
+
+function showSubmissionModal() {
+  const modal = document.getElementById('submissionModal');
+  const endTime = new Date();
+  const timeDiff = endTime - startTime;
+  const minutes = Math.floor(timeDiff / 60000);
+  const seconds = Math.floor((timeDiff % 60000) / 1000);
+  document.getElementById('timeSpent').textContent = `Time spent: ${minutes}m ${seconds}s`;
+
+  const answersList = document.getElementById('answersList');
+  answersList.innerHTML = '';
+  let score = 0;
+
+  for (let i = 27; i <= 40; i++) {
+    let user, correct = correctAnswers[i], isCorrect;
+    const elem = document.querySelector(`[name="q${i}"]`);
+    if (elem.tagName === 'SELECT') {
+      user = elem.value || 'Not answered';
+      isCorrect = user === correct;
+    } else {
+      user = elem ? elem.value.trim().toLowerCase() : 'Not answered';
+      isCorrect = user === correct.toLowerCase();
+    }
+    userAnswers[i] = user;
+    if (isCorrect) score++;
+
+    const item = document.createElement('div');
+    item.className = `answer-item ${isCorrect ? 'correct' : 'incorrect'}`;
+    item.innerHTML = `
+      <div class="answer-text">Question ${i}: ${user}</div>
+      <span class="${isCorrect ? 'correct-answer' : 'incorrect-answer'}">(Correct: ${correct})</span>
+      <span class="answer-status ${isCorrect ? 'correct-status' : 'incorrect-status'}">${isCorrect ? '✓' : '✗'}</span>
+      <div style="margin-top:0.5rem;font-size:0.9rem;color:#6b7280;font-style:italic;">${answerExplanations[i] || ''}</div>
+    `;
+    answersList.appendChild(item);
+  }
+
+  document.getElementById('userScore').textContent = score;
+  document.getElementById('totalQuestions').textContent = "14";
+  const band = (score / 14 * 9).toFixed(1);
+  document.getElementById('bandScore').textContent = `Band: ${band}`;
+
+  let rating, ratingClass;
+  if (score >= 12) { rating = "Excellent!"; ratingClass = "excellent"; }
+  else if (score >= 10) { rating = "Very Good"; ratingClass = "very-good"; }
+  else if (score >= 8) { rating = "Good"; ratingClass = "good"; }
+  else if (score >= 6) { rating = "Fair"; ratingClass = "fair"; }
+  else { rating = "Poor - Needs Improvement"; ratingClass = "poor"; }
+  document.getElementById('performanceRating').textContent = rating;
+  document.getElementById('performanceRating').className = `performance-rating ${ratingClass}`;
+
+  modal.style.display = 'flex';
+  resultsShown = true;
+}
+
+document.getElementById('deliver-button').addEventListener('click', () => {
+  if (resultsShown) return document.getElementById('submissionModal').style.display = 'flex';
+  if (testSubmitted) return;
+  if (confirm('Are you sure you want to submit your test?')) {
+    clearInterval(timerInterval);
+    testSubmitted = true;
+    disableAllInputs();
+    showSubmissionModal();
+  }
+});
+
+document.getElementById('closeSubmission').addEventListener('click', () => {
+  document.getElementById('submissionModal').style.display = 'none';
+});
+
+// Divider drag functionality
+const divider = document.getElementById('divider');
+const passage = document.getElementById('passage-container');
+let isDragging = false;
+let startX, startWidth;
+divider.addEventListener('mousedown', e => {
+  isDragging = true;
+  startX = e.clientX;
+  startWidth = passage.offsetWidth;
+  document.body.style.cursor = 'col-resize';
+});
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const newWidth = startWidth + e.clientX - startX;
+  if (newWidth > 300 && newWidth < window.innerWidth * 0.7) {
+    passage.style.width = newWidth + 'px';
+  }
+});
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+  document.body.style.cursor = '';
+});
+
+// Highlight toolbar functionality (qisqartirilgan, lekin ishlaydi)
+let selectedText = '', selectedRange = null;
+function handleSelection() {
+  const sel = window.getSelection();
+  selectedText = sel.toString().trim();
+  if (selectedText && sel.rangeCount) {
+    selectedRange = sel.getRangeAt(0);
+    const rect = selectedRange.getBoundingClientRect();
+    const toolbar = document.getElementById('highlightToolbar');
+    toolbar.style.display = 'flex';
+    toolbar.style.top = `${rect.top + window.scrollY - 45}px`;
+    toolbar.style.left = `${rect.left + window.scrollX + (rect.width / 2)}px`;
+  } else {
+    document.getElementById('highlightToolbar').style.display = 'none';
+  }
+}
+document.addEventListener('mouseup', handleSelection);
+
+document.querySelectorAll('.highlight-color').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const color = btn.dataset.color;
+    if (selectedRange) {
+      const span = document.createElement('span');
+      span.className = `highlight ${color}`;
+      selectedRange.surroundContents(span);
+      window.getSelection().removeAllRanges();
+      document.getElementById('highlightToolbar').style.display = 'none';
+    }
+  });
+});
+
+document.querySelector('.highlight-toolbar .remove').addEventListener('click', () => {
+  if (selectedRange) {
+    let span = selectedRange.commonAncestorContainer;
+    if (span.nodeType !== 1) span = span.parentNode;
+    if (span && span.classList.contains('highlight')) {
+      const text = document.createTextNode(span.textContent);
+      span.parentNode.replaceChild(text, span);
+    }
+    window.getSelection().removeAllRanges();
+    document.getElementById('highlightToolbar').style.display = 'none';
+  }
+});
+
+// Dark mode toggle
+let darkMode = false;
+document.getElementById('contrastToggle').addEventListener('click', () => {
+  darkMode = !darkMode;
+  if (darkMode) {
+    document.body.style.background = 'radial-gradient(1200px 600px at 10% 0%, #1e293b, transparent), radial-gradient(1200px 600px at 90% 100%, #0f172a, transparent), #111827';
+    document.body.style.color = '#f9fafb';
+    document.querySelector('.header').style.background = '#374151';
+    document.querySelector('.header').style.borderBottomColor = '#4b5563';
+    document.querySelectorAll('.passage-container, .questions-container').forEach(el => { el.style.background = '#1f2937'; el.style.color = '#f9fafb'; });
+    document.querySelectorAll('.question').forEach(el => { el.style.background = '#374151'; el.style.color = '#f9fafb'; el.style.borderColor = '#4b5563'; });
+    document.querySelector('.footer').style.background = '#374151';
+    document.querySelector('.footer').style.borderTopColor = '#4b5563';
+    document.querySelectorAll('select, input').forEach(el => { el.style.background = '#374151'; el.style.color = '#f9fafb'; el.style.borderColor = '#6b7280'; });
+  } else {
+    document.body.style.background = 'radial-gradient(1200px 600px at 10% 0%, #e0f2fe, transparent),radial-gradient(1200px 600px at 90% 100%, #dbeafe, transparent),#f0f9ff';
+    document.body.style.color = '#1e293b';
+    document.querySelector('.header').style.background = '#ffffff';
+    document.querySelector('.header').style.borderBottomColor = '#d1d5db';
+    document.querySelectorAll('.passage-container, .questions-container').forEach(el => { el.style.background = '#f9fafb'; el.style.color = '#1e293b'; });
+    document.querySelectorAll('.question').forEach(el => { el.style.background = '#ffffff'; el.style.color = '#1e293b'; el.style.borderColor = '#d1d5db'; });
+    document.querySelector('.footer').style.background = '#ffffff';
+    document.querySelector('.footer').style.borderTopColor = '#d1d5db';
+    document.querySelectorAll('select, input').forEach(el => { el.style.background = '#ffffff'; el.style.color = '#1e293b'; el.style.borderColor = '#d1d5db'; });
+  }
+});
+
+// Text size toggle
+let textSize = 'normal';
+const sizes = { small: '0.9rem', normal: '1.05rem', large: '1.2rem', xlarge: '1.35rem' };
+document.getElementById('textSizeToggle').addEventListener('click', () => {
+  const keys = Object.keys(sizes);
+  textSize = keys[(keys.indexOf(textSize) + 1) % keys.length];
+  const size = sizes[textSize];
+  document.getElementById('passageContent').style.fontSize = size;
+  document.querySelectorAll('.question-content, .question-rubric, input, select').forEach(el => el.style.fontSize = size);
+});
+
+// Settings modal close
+document.getElementById('settingsClose').addEventListener('click', () => document.getElementById('settingsModal').style.display = 'none');
+window.addEventListener('click', e => {
+  if (e.target === document.getElementById('settingsModal')) document.getElementById('settingsModal').style.display = 'none';
+});
+
+// Mark attempted
+document.querySelectorAll('select, input[type="text"]').forEach(el => {
+  el.addEventListener('change', markAttempted);
+  el.addEventListener('input', markAttempted);
+});
+function markAttempted(e) {
+  const q = e.target.name.replace('q', '');
+  const btn = document.querySelector(`.subQuestion[data-ordernumber="${q}"]`);
+  if (btn && e.target.value.trim()) {
+    btn.classList.add('attempted');
+  } else if (btn) {
+    btn.classList.remove('attempted');
+  }
+}
+</script>
+</body>
+</html>

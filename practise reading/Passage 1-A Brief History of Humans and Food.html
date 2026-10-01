@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IELTS Reading Test - A Brief History of Humans and Food</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {margin: 0;padding: 0;font-family: 'Inter', 'Segoe UI', Arial, sans-serif;background: radial-gradient(1200px 600px at 10% 0%, #e0f2fe, transparent),radial-gradient(1200px 600px at 90% 100%, #dbeafe, transparent),#f0f9ff;overflow: hidden;color: #1e293b;}
+    .test-wrapper {display: flex;flex-direction: column;height: 100vh;}
+    .test-container {display: flex;flex: 1;overflow: hidden;}
+    .header {background: #ffffff;border-bottom: 1px solid #d1d5db;padding: 1rem 2rem;display: flex;justify-content: space-between;align-items: center;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);}
+    .header__logo img {height: 48px;transition: transform 0.3s ease;}
+    .header__logo img:hover {transform: scale(1.1);}
+    .header__timer {font-size: 1.25rem;font-weight: 600;color: #2563eb;background: #eff6ff;padding: 0.5rem 1.5rem;border-radius: 9999px;border: 1px solid #3b82f6;transition: all 0.3s ease;}
+    .header__icons {display: flex;gap: 1.5rem;}
+    .header__icon {font-size: 1.5rem;color: #4b5563;cursor: pointer;transition: all 0.3s ease;}
+    .header__icon:hover {color: #2563eb;transform: scale(1.15);}
+    .settings-modal {display: none;position: fixed;inset: 0;background: rgba(0, 0, 0, 0.75);z-index: 1000;justify-content: center;align-items: center;}
+    .settings-content {background: #ffffff;width: 90%;max-width: 32rem;border-radius: 1rem;box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);animation: slideIn 0.4s ease-out;}
+    @keyframes slideIn {from { transform: translateY(-3rem); opacity: 0; }to { transform: translateY(0); opacity: 1; }}
+    .settings-header {display: flex;justify-content: space-between;align-items: center;padding: 1rem 2rem;background: linear-gradient(90deg, #3b82f6, #1e40af);color: #ffffff;}
+    .settings-header h2 {margin: 0;font-size: 1.25rem;}
+    .settings-close {background: none;border: none;font-size: 1.75rem;cursor: pointer;color: #ffffff;transition: color 0.3s ease;}
+    .settings-close:hover {color: #fed7e2;}
+    .settings-body {padding: 1.5rem;background: #f9fafb;}
+    .settings-option {display: flex;align-items: center;padding: 1rem 0;border-bottom: 1px solid #e5e7eb;cursor: pointer;transition: background 0.2s ease;}
+    .settings-option:hover {background: #eff6ff;}
+    .settings-option:last-child {border-bottom: none;}
+    .settings-option i {margin-right: 0.75rem;width: 1.25rem;text-align: center;color: #2563eb;}
+    .settings-option span {font-size: 1.1rem;}
+    .sectionRubric {margin: 1.5rem;padding: 1.25rem;background: #ffffff;border: 1px solid #d1d5db;border-radius: 0.75rem;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);}
+    .sectionRubric h2 {font-size: 1.25rem;color: #2563eb;margin-bottom: 0.5rem;}
+    .passage-container {width: 45%;height: 100%;overflow-y: auto;padding: 1.5rem;box-sizing: border-box;background: #f9fafb;border-right: 1px solid #d1d5db;position: relative;user-select: text;-webkit-user-select: text;}
+    .questions-container {flex: 1;height: 100%;overflow-y: auto;padding: 1.5rem;box-sizing: border-box;background: #f9fafb;user-select: text;-webkit-user-select: text;position: relative;}
+    .highlight {border-radius: 0.25rem;padding: 0 0.25rem;}
+    .highlight.yellow { background: rgba(254, 243, 199, 0.5); }
+    .highlight.green { background: rgba(187, 247, 208, 0.5); }
+    .highlight.pink { background: rgba(251, 207, 232, 0.5); }
+    .highlight.blue { background: rgba(191, 219, 254, 0.5); }
+    .highlight-toolbar {position: fixed;background: #ffffff;border: 1px solid #d1d5db;border-radius: 0.5rem;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);display: none;z-index: 1000;padding: 0.5rem;transform: translate(-50%, -100%);margin-top: -0.5rem;}
+    .highlight-toolbar button {background: none;border: none;width: 2rem;height: 2rem;cursor: pointer;border-radius: 0.25rem;transition: all 0.2s ease;}
+    .highlight-toolbar button:hover {background: #eff6ff;transform: scale(1.1);}
+    .highlight-toolbar button.remove {color: #ef4444;}
+    .divider {width: 14px;background: #e5e7eb;cursor: col-resize;position: relative;}
+    .divider-handle {width: 6px;height: 60px;background: #6b7280;border-radius: 4px;position: absolute;top: 50%;left: 4px;transform: translateY(-50%);}
+    .question {margin-bottom: 2rem;background: #ffffff;padding: 1.5rem;border-radius: 0.75rem;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);transition: transform 0.2s ease;}
+    .question:hover {transform: translateY(-2px);}
+    .question-rubric {margin-bottom: 1.5rem;font-weight: 600;color: #1f2937;}
+    .question-rubric h3 {margin: 0 0 0.5rem;color: #2563eb;}
+    .question-rubric p {margin: 0.25rem 0;color: #4b5563;}
+    .question-number {font-weight: 700;color: #2563eb;}
+    .footer {background: #ffffff;border-top: 1px solid #d1d5db;padding: 1.25rem;box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.05);}
+    .nav-row {display: flex;align-items: center;justify-content: space-between;}
+    .footer__questionWrapper {display: flex;align-items: center;}
+    .footer__subquestionWrapper {display: flex;flex-wrap: wrap;margin-left: 1.25rem;}
+    .subQuestion {width: 2.5rem;height: 2.5rem;border-radius: 50%;border: 1px solid #d1d5db;background: #f3f4f6;margin: 0.25rem;cursor: pointer;display: flex;align-items: center;justify-content: center;color: #4b5563;font-weight: 600;transition: all 0.3s ease;}
+    .subQuestion.active {background: #2563eb;color: #ffffff;border-color: #2563eb;}
+    .subQuestion.attempted {background: #60a5fa;color: #ffffff;}
+    .footer__deliverButton {background: #2563eb;color: #ffffff;border: none;padding: 0.75rem 1.5rem;border-radius: 0.5rem;cursor: pointer;font-weight: 600;transition: all 0.3s ease;}
+    .footer__deliverButton:hover {background: #1e40af;transform: translateY(-2px);}
+    .footer__deliverButton:disabled {background: #d1d5db;cursor: not-allowed;}
+    .submission-modal {display: none;position: fixed;inset: 0;background: rgba(0, 0, 0, 0.8);z-index: 2000;justify-content: center;align-items: center;}
+    .submission-content {background: #ffffff;width: 90%;max-width: 48rem;border-radius: 1rem;padding: 2rem;box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);max-height: 90vh;overflow-y: auto;}
+    .submission-content h2 {margin-top: 0;color: #2563eb;border-bottom: 2px solid #2563eb;padding-bottom: 0.75rem;font-size: 1.75rem;}
+    .answers-section {margin-top: 1.5rem;}
+    .answer-item {padding: 0.75rem;margin-bottom: 0.5rem;border-radius: 0.5rem;border-left: 6px solid #d1d5db;background: #f9fafb;}
+    .answer-item.correct {border-left-color: #10b981;background: #ecfdf5;}
+    .answer-item.incorrect {border-left-color: #ef4444;background: #fef2f2;}
+    .answer-text {font-weight: 600;}
+    .correct-answer {color: #10b981;margin-left: 0.75rem;}
+    .incorrect-answer {color: #ef4444;margin-left: 0.75rem;}
+    .answer-status {float: right;margin-left: 1rem;}
+    .correct-status {color: #10b981;}
+    .incorrect-status {color: #ef4444;}
+    .submission-buttons {margin-top: 1.5rem;text-align: right;}
+    .submission-buttons button {padding: 0.75rem 1.5rem;margin-left: 1rem;border-radius: 0.5rem;cursor: pointer;font-weight: 600;}
+    .submission-buttons .confirm {background: #2563eb;color: #ffffff;border: none;}
+    .submission-buttons .confirm:hover {background: #1e40af;transform: translateY(-2px);}
+    .score-display {text-align: center;margin-bottom: 1.5rem;padding: 1.5rem;background: #eff6ff;border-radius: 0.75rem;}
+    .score-number {font-size: 3rem;font-weight: bold;color: #2563eb;margin: 0.75rem 0;}
+    .score-total {font-size: 1.25rem;color: #4b5563;}
+    .performance-rating {font-size: 1.25rem;font-weight: bold;margin: 1.25rem 0;padding: 0.75rem;border-radius: 0.5rem;}
+    .excellent { color: #065f46; background: #ecfdf5; }
+    .very-good { color: #047857; background: #ecfdf5; }
+    .good { color: #34d399; background: #ecfdf5; }
+    .fair { color: #d97706; background: #fefce8; }
+    .poor { color: #dc2626; background: #fef2f2; }
+    .band-score {font-size: 2rem;font-weight: bold;color: #2563eb;margin: 0.75rem 0;}
+    .highlight-color {width: 1.75rem;height: 1.75rem;border-radius: 50%;border: 1px solid #d1d5db;cursor: pointer;transition: transform 0.2s ease;}
+    .highlight-color:hover {transform: scale(1.2);}
+    .highlight-color.yellow { background: #fef3c7; }
+    .highlight-color.green { background: #bbf7d0; }
+    .highlight-color.pink { background: #fbcfe8; }
+    .highlight-color.blue { background: #bfdbfe; }
+    #passageContent {line-height: 1.6;font-size: 1.05rem;}
+    #passageContent h2 {margin: 1.5rem 0 1rem 0;line-height: 1.4;}
+    #passageContent p {margin: 1.2rem 0;text-align: justify;line-height: 1.7;}
+  </style>
+</head>
+<body>
+<div class="test-wrapper">
+  <header class="header">
+    <div class="flex items-center">
+      <img src="https://d2snzxottmona5.cloudfront.net/releases/3.46.0/images/logo/ielts.svg" alt="IELTS Logo" class="h-12 transition-transform hover:scale-110">
+    </div>
+    <div class="flex-1 flex justify-center">
+      <a href="https://t.me/jasurbekisaev" target="_blank" class="flex items-center gap-3 text-blue-700 hover:text-blue-900 font-semibold text-xl transition-all hover:scale-105">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-.38.24-1.07.7-.96.66-1.89 1.28-1.89 1.28s-.17.11-.49.03c-.32-.08-.72-.26-1.16-.47-.54-.26-1.17-.53-1.17-.53s-.87-.55.62-1.14c.32-.13 1.96-.84 2.99-1.2 1.05-.37 2.86-1.01 2.86-1.01s1.02-.4 1.02 0z"/>
+        </svg>
+        Jasurbek’s blog
+      </a>
+    </div>
+    <div class="header__timer" id="testTimer">00:00</div>
+    <div class="header__icons">
+      <i class="fas fa-adjust header__icon" id="contrastToggle" title="Dark mode"></i>
+      <i class="fas fa-text-height header__icon" id="textSizeToggle" title="Text size"></i>
+      <i class="fas fa-circle-question header__icon" title="Tips" onclick="alert('Complete TRUE/FALSE/NOT GIVEN (1-5), Notes completion (6-13). Use highlighter by selecting text.')"></i>
+    </div>
+  </header>
+
+  <div class="test-container">
+    <div class="passage-container" id="passage-container">
+      <div class="sectionRubric">
+        <h2>Reading Passage 1</h2>
+        <p>You should spend about 20 minutes on Questions 1-13, which are based on Reading Passage 1 below.</p>
+      </div>
+      <div class="highlight-toolbar" id="highlightToolbar">
+        <button class="highlight-color yellow" data-color="yellow" title="Yellow highlight"></button>
+        <button class="highlight-color green" data-color="green" title="Green highlight"></button>
+        <button class="highlight-color pink" data-color="pink" title="Pink highlight"></button>
+        <button class="highlight-color blue" data-color="blue" title="Blue highlight"></button>
+        <button class="remove" title="Remove highlight"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="passageContent">
+        <h2 class="text-center text-xl font-bold text-gray-800">A Brief History of Humans and Food</h2>
+        <p>During the journey from our hunter-gatherer ancestors to the present day there have been three seismic changes that have had an impact on the food we eat: the discovery of cooking, the emergence of agriculture and the invention of methods of preserving food.</p>
+        <p>The 19th-century scientist Charles Darwin thought that cooking, after language, was the greatest discovery made by man. All of us eat some raw food, for instance fruit and vegetables, but the great majority of food we eat is cooked. Cooking can turn plants that are inedible into edible food by destroying toxic chemicals that plants often manufacture to protect themselves against attack by insects or other herbivorous animals. These toxic chemicals are referred to as ‘plant secondary compounds’, because they are not directly involved in the plant’s normal growth, development and reproduction, and are produced purely as chemical defences. They give many of the plants we consume, such as coffee or brussels sprouts, their bitter taste.</p>
+        <p>Cooked food is often more digestible, because heat breaks down tough cellulose cell walls in plants or tough connective tissue in animals. Chewing raw turnip, a plate of uncooked rice, or a raw leg of lamb is much harder work than eating the cooked equivalent. The energy expended in chewing to break down the tough material is replaced by energy from the fuel that is used in cooking the food, so the ratio of energy gained to energy expended by the body is greater when food is cooked.</p>
+        <p>Until the development of agriculture, hunter-gatherers spent up to seven hours a day gathering food. This all began to change around 10,500 years ago with the advent of farming, which led to some dramatic changes in human societies. People began to create a variety of new tools to help with survival, and in turn populations increased in size. These changes led to the possibility of specialisation of different tasks within society. It was around this time that writing became more sophisticated and allowed people to maintain records of the harvest and taxes. Eventually, formalised structures of government were established as people settled in one area.</p>
+        <p>The arrival of agriculture meant that, for the first time, our ancestors had more food than they could eat immediately. This, combined with the seasonality of production, led them to discover methods of preserving food: smoking, drying, adding acid by fermentation or adding salt. These four methods all share one feature in common: they make the food a more hostile environment for bacteria that can cause it to spoil. They also tend to slow down any natural chemical reactions in the food that would cause decay.</p>
+        <p>Although foods today are still preserved in the ancient ways, two more recent methods of preserving food have become more common: canning and freezing. Canning was invented by a Frenchman, Nicholas Appert, in the early-19th century. He sealed food in bottles fabricated from glass and then heated them in boiling water to cook the contents. Appert’s method had great advantages over older methods of food preservation: it could be applied to a wide range of foods, and the flavour of the food as well as the texture were similar to the freshly cooked product. His idea was soon copied by Englishman, Peter Durand. Until this point containers had weighed too much to be widely used, but he produced the first ones which were light and resistant to damage. Two years later, in 1812, two Englishmen, Bryan Donkin and John Hall, started the commercial canning of food, although the real take-off in popularity of canning had to wait until the can opener was invented in 1855. Up to this time, cans were opened with a chisel which was used to break open the top when hit with a hammer.</p>
+        <p>Canning is an extremely effective way of preserving food: one can which contained meat dating from 1824 was opened in 1939 and the contents were still in good condition. In the 21st century, the dominance of canning as a method of food preservation has been overtaken by another technology: freezing.</p>
+        <p>Chilling food to keep it fresh is an old idea. The earliest mentions of icehouses, thick-walled buildings, half underground, date back to 1,700BC in northwest Iran. In early 16th-century Italy, water was mixed with chemicals to lower its freezing point to -18 degrees Celsius, and several centuries later frozen fish and other goods were transported by ship from Australia to England. But the modern frozen food industry was started in the 1920s by an American, Clarence Birdseye. While Birdseye was on a fishing trip with the Inuit in the Canadian Arctic, he observed that very rapid freezing creates smaller ice crystals and therefore causes less damage to food. This was something he had not expected. Nevertheless, the big growth in demand for frozen food came about with the arrival of freezers in the homes of ordinary people. The advantages of frozen over canned food include the fact that the flavour and consistency are often identical to the equivalent fresh product, and that freezing can be used to preserve a huge variety of foods.</p>
+      </div>
+    </div>
+
+    <div class="divider" id="divider"><div class="divider-handle"></div></div>
+
+    <div class="questions-container" id="questions-container">
+
+      <div class="question">
+        <div class="question-rubric">
+          <h3>Questions 1–5</h3>
+          <p>Do the following statements agree with the information given in Reading Passage 1?<br>In boxes 1-5 on your answer sheet, write<br>TRUE if the statement agrees with the information<br>FALSE if the statement contradicts the information<br>NOT GIVEN if there is no information on this</p>
+        </div>
+        <div class="question-content">
+          <div class="yes-no-option"><p><span class="question-number">1</span> According to Darwin, cooking was the most significant development in human history.</p><select name="q1"><option value="">--</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">2</span> The process of cooking gets rid of some plant poisons.</p><select name="q2"><option value="">--</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">3</span> Eating cooked food is more energy efficient than eating raw food.</p><select name="q3"><option value="">--</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">4</span> Clarence Birdseye had previously worked in the Australian food industry.</p><select name="q4"><option value="">--</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+          <div class="yes-no-option"><p><span class="question-number">5</span> Birdseye’s trip with the Inuit confirmed what he already believed about rapid freezing.</p><select name="q5"><option value="">--</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="question-rubric">
+          <h3>Questions 6–13</h3>
+          <p>Complete the notes below.<br>Choose ONE WORD ONLY from the passage for each answer.<br>Write your answers in boxes 6-13 on your answer sheet.</p>
+        </div>
+        <div class="question-content">
+          <p>The development of agriculture and food preservation</p>
+          <p>The changes agriculture brought about were:</p>
+          <ul class="list-disc pl-6">
+            <li>the development of equipment and larger <input type="text" name="q6" placeholder="Your answer" class="border p-2 rounded w-full mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></li>
+            <li>the ability to keep <input type="text" name="q7" placeholder="Your answer" class="border p-2 rounded w-full mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"> as writing developed</li>
+            <li>the setting up of organised government</li>
+          </ul>
+          <p>Food preservation</p>
+          <ul class="list-disc pl-6">
+            <li>early methods of food preservation included: smoking, drying and combining food with acid or <input type="text" name="q8" placeholder="Your answer" class="border p-2 rounded w-full mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500">.</li>
+            <li>canning</li>
+            <ul class="list-disc pl-8">
+              <li>Nicholas Appert put food into containers made of <input type="text" name="q9" placeholder="Your answer" class="border p-2 rounded w-full mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500">.</li>
+              <li>Appert’s method resulted in preserved food that had the same taste and <input type="text" name="q10" placeholder="Your answer" class="border p-2 rounded w-full mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"> as fresh food</li>
+              <li>Peter Durand introduced cans which had the advantage of being <input type="text" name="q11" placeholder="Your answer" class="border p-2 rounded w-full mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"> and hard to break</li>
+              <li>in 1855, the metal can opener replaced the <input type="text" name="q12" placeholder="Your answer" class="border p-2 rounded w-full mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"> which had been used with a hammer to open cans</li>
+              <li>some food was still found to be edible after more than a hundred years, e.g. an old can of <input type="text" name="q13" placeholder="Your answer" class="border p-2 rounded w-full mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500">.</li>
+            </ul>
+            <li>freezing</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <nav class="nav-row">
+      <div class="footer__questionWrapper">
+        <div class="footer__subquestionWrapper">
+          <button class="subQuestion" data-ordernumber="1"><span>1</span></button>
+          <button class="subQuestion" data-ordernumber="2"><span>2</span></button>
+          <button class="subQuestion" data-ordernumber="3"><span>3</span></button>
+          <button class="subQuestion" data-ordernumber="4"><span>4</span></button>
+          <button class="subQuestion" data-ordernumber="5"><span>5</span></button>
+          <button class="subQuestion" data-ordernumber="6"><span>6</span></button>
+          <button class="subQuestion" data-ordernumber="7"><span>7</span></button>
+          <button class="subQuestion" data-ordernumber="8"><span>8</span></button>
+          <button class="subQuestion" data-ordernumber="9"><span>9</span></button>
+          <button class="subQuestion" data-ordernumber="10"><span>10</span></button>
+          <button class="subQuestion" data-ordernumber="11"><span>11</span></button>
+          <button class="subQuestion" data-ordernumber="12"><span>12</span></button>
+          <button class="subQuestion" data-ordernumber="13"><span>13</span></button>
+        </div>
+      </div>
+      <button id="deliver-button" class="footer__deliverButton"><i class="fas fa-check"></i> Submit</button>
+    </nav>
+  </footer>
+</div>
+
+<div class="submission-modal" id="submissionModal">
+  <div class="submission-content">
+    <h2 id="submissionTitle">Test Results</h2>
+    <div class="score-display">
+      <div>Your Score:</div>
+      <div class="score-number" id="userScore">0</div>
+      <div class="score-total">out of <span id="totalQuestions">13</span></div>
+      <div class="band-score" id="bandScore">Band: 0.0</div>
+      <div class="performance-rating" id="performanceRating">Poor - Needs Improvement</div>
+    </div>
+    <div class="time-spent" id="timeSpent"></div>
+    <p id="submissionMessage">Here are your answers with the correct solutions:</p>
+    <div class="answers-section">
+      <h3>Your Answers:</h3>
+      <div id="answersList"></div>
+    </div>
+    <div class="submission-buttons">
+      <button class="confirm" id="closeSubmission">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const correctAnswers = {
+  1: "FALSE",
+  2: "TRUE",
+  3: "TRUE",
+  4: "NOT GIVEN",
+  5: "FALSE",
+  6: "populations",
+  7: "records",
+  8: "salt",
+  9: "glass",
+  10: "texture",
+  11: "light",
+  12: "chisel",
+  13: "meat"
+};
+
+const answerExplanations = {
+  1: "FALSE – Darwin thought cooking was the greatest discovery AFTER language, not the most significant overall.",
+  2: "TRUE – Cooking destroys toxic chemicals (plant secondary compounds) in plants.",
+  3: "TRUE – Energy from cooking fuel replaces energy expended in chewing raw food; cooked food is more energy efficient.",
+  4: "NOT GIVEN – No mention of Birdseye working in Australian food industry.",
+  5: "FALSE – Birdseye observed rapid freezing causes less damage – this was something he had NOT expected.",
+  6: "populations – populations increased in size.",
+  7: "records – maintain records of the harvest and taxes.",
+  8: "salt – adding salt.",
+  9: "glass – bottles fabricated from glass.",
+  10: "texture – flavour ... and texture were similar.",
+  11: "light – light and resistant to damage.",
+  12: "chisel – cans were opened with a chisel ... with a hammer.",
+  13: "meat – can which contained meat dating from 1824."
+};
+
+let totalSeconds = 0;
+const timerElement = document.getElementById('testTimer');
+let testSubmitted = false;
+let userAnswers = {};
+let startTime = new Date();
+let resultsShown = false;
+
+function updateTimer() {
+  if (testSubmitted) return;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  totalSeconds++;
+}
+const timerInterval = setInterval(updateTimer, 1000);
+
+function disableAllInputs() {
+  document.querySelectorAll('select, input[type="text"]').forEach(input => input.disabled = true);
+  document.getElementById('deliver-button').disabled = true;
+}
+
+function showSubmissionModal() {
+  const modal = document.getElementById('submissionModal');
+  const endTime = new Date();
+  const timeDiff = endTime - startTime;
+  const minutes = Math.floor(timeDiff / 60000);
+  const seconds = Math.floor((timeDiff % 60000) / 1000);
+  document.getElementById('timeSpent').textContent = `Time spent: ${minutes}m ${seconds}s`;
+
+  const answersList = document.getElementById('answersList');
+  answersList.innerHTML = '';
+  let score = 0;
+
+  for (let i = 1; i <= 13; i++) {
+    let user, correct = correctAnswers[i], isCorrect;
+    const elem = document.querySelector(`[name="q${i}"]`);
+    if (elem.tagName === 'SELECT') {
+      user = elem.value || 'Not answered';
+      isCorrect = user === correct;
+    } else {
+      user = elem ? elem.value.trim().toLowerCase() : 'Not answered';
+      isCorrect = user === correct.toLowerCase();
+    }
+    userAnswers[i] = user;
+    if (isCorrect) score++;
+
+    const item = document.createElement('div');
+    item.className = `answer-item ${isCorrect ? 'correct' : 'incorrect'}`;
+    item.innerHTML = `
+      <div class="answer-text">Question ${i}: ${user}</div>
+      <span class="${isCorrect ? 'correct-answer' : 'incorrect-answer'}">(Correct: ${correct})</span>
+      <span class="answer-status ${isCorrect ? 'correct-status' : 'incorrect-status'}">${isCorrect ? '✓' : '✗'}</span>
+      <div style="margin-top:0.5rem;font-size:0.9rem;color:#6b7280;font-style:italic;">${answerExplanations[i]}</div>
+    `;
+    answersList.appendChild(item);
+  }
+
+  document.getElementById('userScore').textContent = score;
+  document.getElementById('totalQuestions').textContent = "13";
+  const band = (score / 13 * 9).toFixed(1);
+  document.getElementById('bandScore').textContent = `Band: ${band}`;
+
+  let rating, ratingClass;
+  if (score >= 11) { rating = "Excellent!"; ratingClass = "excellent"; }
+  else if (score >= 9) { rating = "Very Good"; ratingClass = "very-good"; }
+  else if (score >= 7) { rating = "Good"; ratingClass = "good"; }
+  else if (score >= 5) { rating = "Fair"; ratingClass = "fair"; }
+  else { rating = "Poor - Needs Improvement"; ratingClass = "poor"; }
+  document.getElementById('performanceRating').textContent = rating;
+  document.getElementById('performanceRating').className = `performance-rating ${ratingClass}`;
+
+  modal.style.display = 'flex';
+  resultsShown = true;
+}
+
+document.getElementById('deliver-button').addEventListener('click', () => {
+  if (resultsShown) return document.getElementById('submissionModal').style.display = 'flex';
+  if (testSubmitted) return;
+  if (confirm('Are you sure you want to submit your test?')) {
+    clearInterval(timerInterval);
+    testSubmitted = true;
+    disableAllInputs();
+    showSubmissionModal();
+  }
+});
+
+document.getElementById('closeSubmission').addEventListener('click', () => {
+  document.getElementById('submissionModal').style.display = 'none';
+});
+
+// Divider drag
+const divider = document.getElementById('divider');
+const passage = document.getElementById('passage-container');
+let isDragging = false;
+let startX, startWidth;
+divider.addEventListener('mousedown', e => {
+  isDragging = true;
+  startX = e.clientX;
+  startWidth = passage.offsetWidth;
+  document.body.style.cursor = 'col-resize';
+});
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const newWidth = startWidth + e.clientX - startX;
+  if (newWidth > 300 && newWidth < window.innerWidth * 0.7) {
+    passage.style.width = newWidth + 'px';
+  }
+});
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+  document.body.style.cursor = '';
+});
+
+// Highlight toolbar
+let selectedText = '', selectedRange = null;
+function handleSelection() {
+  const sel = window.getSelection();
+  selectedText = sel.toString().trim();
+  if (selectedText && sel.rangeCount) {
+    selectedRange = sel.getRangeAt(0);
+    const rect = selectedRange.getBoundingClientRect();
+    const toolbar = document.getElementById('highlightToolbar');
+    toolbar.style.display = 'flex';
+    toolbar.style.top = `${rect.top + window.scrollY - 45}px`;
+    toolbar.style.left = `${rect.left + window.scrollX + (rect.width / 2)}px`;
+  } else {
+    document.getElementById('highlightToolbar').style.display = 'none';
+  }
+}
+document.addEventListener('mouseup', handleSelection);
+
+document.querySelectorAll('.highlight-color').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const color = btn.dataset.color;
+    if (selectedRange) {
+      const span = document.createElement('span');
+      span.className = `highlight ${color}`;
+      selectedRange.surroundContents(span);
+      window.getSelection().removeAllRanges();
+      document.getElementById('highlightToolbar').style.display = 'none';
+    }
+  });
+});
+
+document.querySelector('.highlight-toolbar .remove').addEventListener('click', () => {
+  if (selectedRange) {
+    let span = selectedRange.commonAncestorContainer;
+    if (span.nodeType !== 1) span = span.parentNode;
+    if (span && span.classList.contains('highlight')) {
+      const text = document.createTextNode(span.textContent);
+      span.parentNode.replaceChild(text, span);
+    }
+    window.getSelection().removeAllRanges();
+    document.getElementById('highlightToolbar').style.display = 'none';
+  }
+});
+
+// Dark mode
+let darkMode = false;
+document.getElementById('contrastToggle').addEventListener('click', () => {
+  darkMode = !darkMode;
+  if (darkMode) {
+    document.body.style.background = 'radial-gradient(1200px 600px at 10% 0%, #1e293b, transparent), radial-gradient(1200px 600px at 90% 100%, #0f172a, transparent), #111827';
+    document.body.style.color = '#f9fafb';
+    document.querySelector('.header').style.background = '#374151';
+    document.querySelector('.header').style.borderBottomColor = '#4b5563';
+    document.querySelectorAll('.passage-container, .questions-container').forEach(el => { el.style.background = '#1f2937'; el.style.color = '#f9fafb'; });
+    document.querySelectorAll('.question').forEach(el => { el.style.background = '#374151'; el.style.color = '#f9fafb'; el.style.borderColor = '#4b5563'; });
+    document.querySelector('.footer').style.background = '#374151';
+    document.querySelector('.footer').style.borderTopColor = '#4b5563';
+    document.querySelectorAll('select, input').forEach(el => { el.style.background = '#374151'; el.style.color = '#f9fafb'; el.style.borderColor = '#6b7280'; });
+  } else {
+    document.body.style.background = 'radial-gradient(1200px 600px at 10% 0%, #e0f2fe, transparent),radial-gradient(1200px 600px at 90% 100%, #dbeafe, transparent),#f0f9ff';
+    document.body.style.color = '#1e293b';
+    document.querySelector('.header').style.background = '#ffffff';
+    document.querySelector('.header').style.borderBottomColor = '#d1d5db';
+    document.querySelectorAll('.passage-container, .questions-container').forEach(el => { el.style.background = '#f9fafb'; el.style.color = '#1e293b'; });
+    document.querySelectorAll('.question').forEach(el => { el.style.background = '#ffffff'; el.style.color = '#1e293b'; el.style.borderColor = '#d1d5db'; });
+    document.querySelector('.footer').style.background = '#ffffff';
+    document.querySelector('.footer').style.borderTopColor = '#d1d5db';
+    document.querySelectorAll('select, input').forEach(el => { el.style.background = '#ffffff'; el.style.color = '#1e293b'; el.style.borderColor = '#d1d5db'; });
+  }
+});
+
+// Text size
+let textSize = 'normal';
+const sizes = { small: '0.9rem', normal: '1.05rem', large: '1.2rem', xlarge: '1.35rem' };
+document.getElementById('textSizeToggle').addEventListener('click', () => {
+  const keys = Object.keys(sizes);
+  textSize = keys[(keys.indexOf(textSize) + 1) % keys.length];
+  const size = sizes[textSize];
+  document.getElementById('passageContent').style.fontSize = size;
+  document.querySelectorAll('.question-content, .question-rubric, input, select').forEach(el => el.style.fontSize = size);
+});
+
+// Settings modal
+document.getElementById('settingsClose').addEventListener('click', () => document.getElementById('settingsModal').style.display = 'none');
+window.addEventListener('click', e => {
+  if (e.target === document.getElementById('settingsModal')) document.getElementById('settingsModal').style.display = 'none';
+});
+
+// Attempted
+document.querySelectorAll('select, input[type="text"]').forEach(el => {
+  el.addEventListener('change', markAttempted);
+  el.addEventListener('input', markAttempted);
+});
+function markAttempted(e) {
+  const q = e.target.name.replace('q', '');
+  const btn = document.querySelector(`.subQuestion[data-ordernumber="${q}"]`);
+  if (btn && e.target.value.trim()) {
+    btn.classList.add('attempted');
+  } else if (btn) {
+    btn.classList.remove('attempted');
+  }
+}
+</script>
+</body>
+</html>
