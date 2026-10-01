@@ -1,75 +1,95 @@
 import os
 import re
 
-# Reading HTML fayllari joylashgan papka
 READING_DIR = os.path.join(os.path.dirname(__file__), "practise reading")
 
-# submitTest oxiriga qo'shiladigan AIOS postMessage kodi
-POSTMESSAGE_SNIPPET = """
-    // AIOS Weakness Analytics Integration
-    try {
-        if (window.parent && typeof questionResults !== 'undefined') {
-            window.parent.postMessage({
-                type: "AIOS_TEST_RESULT",
-                results: questionResults
-            }, "*");
-            console.log("AIOS_TEST_RESULT sent to parent:", questionResults);
-        }
-    } catch (e) {
-        console.error("AIOS postMessage error:", e);
+# Universal JS Handler (HTML fayl tugashidan oldin qo'shiladi)
+UNIVERSAL_SCRIPT = """
+<script>
+(function() {
+    // Original submitTest funksiyasini ushlab olish
+    const originalSubmit = window.submitTest;
+    
+    if (typeof originalSubmit === 'function') {
+        window.submitTest = function() {
+            // Avval original test tekshiruvini yurgizamiz
+            const res = originalSubmit.apply(this, arguments);
+            
+            // Natijalarni yig'ib olish
+            try {
+                let resultsToSend = [];
+                
+                if (typeof questionResults !== 'undefined' && Array.isArray(questionResults)) {
+                    resultsToSend = questionResults;
+                } else if (typeof userAnswers !== 'undefined' && typeof correctAnswers !== 'undefined') {
+                    // Agar questionResults bo'lmasa, o'zimiz yasaymiz
+                    Object.keys(correctAnswers).forEach(qNum => {
+                        const userAns = (userAnswers[qNum] || "").trim().toLowerCase();
+                        const correctAns = (correctAnswers[qNum] || "").trim().toLowerCase();
+                        
+                        // Question Type aniqlash
+                        let qType = "Other";
+                        if (typeof questionTypes !== 'undefined' && questionTypes[qNum]) {
+                            qType = questionTypes[qNum];
+                        }
+                        
+                        resultsToSend.push({
+                            number: qNum,
+                            type: qType,
+                            correct: userAns === correctAns
+                        });
+                    });
+                }
+
+                if (window.parent && resultsToSend.length > 0) {
+                    window.parent.postMessage({
+                        type: "AIOS_TEST_RESULT",
+                        results: resultsToSend
+                    }, "*");
+                    console.log("? AIOS: Test natijalari uzatildi:", resultsToSend);
+                }
+            } catch (err) {
+                console.error("? AIOS Integration Error:", err);
+            }
+
+            return res;
+        };
     }
+})();
+</script>
 """
 
 def patch_file(filepath):
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Agar allaqachon patch qilingan bo'lsa, o'tkazib yuboramiz
+    # Eskisini tozalash va yangi universal scriptni qo'shish
     if "AIOS_TEST_RESULT" in content:
-        print(f"?? Allaqachon ulangan: {os.path.basename(filepath)}")
-        return
+        # Eski koda ega bo'lsa ham ustidan tozalab yangilaymiz
+        content = re.sub(r'<script>\s*\(function\(\)\s*\{\s*// Original submitTest[\s\S]*?</script>', '', content)
 
-    # submitTest funksiyasining oxirgi qavsidan oldin joylashtirish
-    if "function submitTest(" in content or "function submitTest (" in content:
-        # submitTest funksiyasini topish va uning ichiga inject qilish
-        # showModal yoki modal ko'rsatilishidan oldin yoki funksiya tugashidan oldin
-        patched = False
-        
-        if "showModal(" in content:
-            content = content.replace("showModal(", POSTMESSAGE_SNIPPET + "\n    showModal(", 1)
-            patched = True
-        elif "alert(" in content:
-            content = content.replace("alert(", POSTMESSAGE_SNIPPET + "\n    alert(", 1)
-            patched = True
-        else:
-            # Funksiya oxiridagi return yoki yakunlovchi joyga qo'shish
-            pattern = r"(function\s+submitTest\s*\([\s\S]*?)(\}\s*$|\}\s*</script>)"
-            if re.search(pattern, content):
-                content = re.sub(pattern, r"\1" + POSTMESSAGE_SNIPPET + r"\n\2", content, count=1)
-                patched = True
-
-        if patched:
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.write(content)
-            print(f"? Muvaffaqiyatli ulandi: {os.path.basename(filepath)}")
-        else:
-            print(f"?? submitTest strukturasi mos kelmadi: {os.path.basename(filepath)}")
+    if "</body>" in content:
+        content = content.replace("</body>", UNIVERSAL_SCRIPT + "\n</body>")
     else:
-        print(f"? submitTest topilmadi: {os.path.basename(filepath)}")
+        content += UNIVERSAL_SCRIPT
 
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(content)
+        
+    print(f"? Patch qilindi: {os.path.basename(filepath)}")
 
 def main():
     if not os.path.exists(READING_DIR):
         print(f"Papkasi topilmadi: {READING_DIR}")
         return
 
-    print("?? Reading HTML fayllarga AIOS integration ulanmoqda...\n")
+    print("?? HTML fayllarga universal AIOS handler ulanmoqda...\n")
     for root, _, files in os.walk(READING_DIR):
         for file in files:
             if file.endswith(".html"):
                 patch_file(os.path.join(root, file))
 
-    print("\n?? Tayyor! Barcha HTML fayllar avtomatik patch qilindi.")
+    print("\n?? Tayyor! Barcha HTML fayllar yangilandi.")
 
 if __name__ == "__main__":
     main()
