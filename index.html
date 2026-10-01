@@ -2,8 +2,8 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AIOS Practice Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AIOS IELTS Practice</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -11,24 +11,35 @@
 
     <!-- Main Dashboard -->
     <div id="main-dashboard" class="container">
+        <!-- Header -->
         <div class="app-header">
-            <h1>?? AIOS Practice</h1>
-            <span id="passage-count" style="font-size: 12px; color: #888;">0 Passages</span>
+            <div class="brand-badge">
+                <div class="brand-icon">?</div>
+                <div class="brand-text">
+                    <h1>AIOS Practice</h1>
+                    <p>IELTS Reading Engine</p>
+                </div>
+            </div>
+            <span id="passage-count" class="passage-badge">0 Passages</span>
         </div>
 
-        <div style="margin-top: 16px;">
-            <h3>?? Reading Passages</h3>
-            <p style="font-size: 13px; color: #aaa; margin-bottom: 12px;">Testni tanlang va to'liq ekranda ishlang:</p>
-            <div id="full-practice-list">
-                <!-- Testlar ro'yxati chiqadi -->
-            </div>
+        <!-- Motivation Hero Banner -->
+        <div class="hero-card">
+            <h2>?? Maqsad sari navbatdagi qadam!</h2>
+            <p>Bugungi kichik mashq ertangi yuqori Band Score poydevoridir. Testni tanlang va to'liq diqqat bilan ishlang.</p>
+        </div>
+
+        <!-- Passage List -->
+        <div class="section-title">Mavjud Reading Passage'lar</div>
+        <div id="full-practice-list" class="test-list">
+            <!-- JavaScript orqali zamonaviy kartochkalar yuklanadi -->
         </div>
     </div>
 
-    <!-- FULL SCREEN TEST VIEW (Focused) -->
+    <!-- FULL SCREEN TEST VIEW (Focused View) -->
     <div id="test-view" class="hidden">
         <div class="test-header-bar">
-            <button class="back-btn">?? Orqaga</button>
+            <button class="back-btn">&larr; Orqaga</button>
             <span id="active-test-title" class="test-title-text">Reading Test</span>
         </div>
         <div class="test-frame-container">
