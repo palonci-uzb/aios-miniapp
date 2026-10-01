@@ -1,253 +1,122 @@
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-    background-color: #f4f6f8;
-    color: #222;
-    padding: 12px;
-}
-
-.container {
-    max-width: 600px;
-    margin: 0 auto;
+    background-color: #121212;
+    color: #ffffff;
+    overflow-x: hidden;
 }
 
 .hidden {
     display: none !important;
 }
 
-/* Header & Badges */
-.header {
-    margin-bottom: 16px;
-}
-
-.subtitle {
-    font-size: 13px;
-    color: #666;
-}
-
-.badge {
-    display: inline-block;
-    padding: 3px 8px;
-    font-size: 11px;
-    background: #e1f5fe;
-    color: #0288d1;
-    border-radius: 12px;
-    margin-top: 6px;
-    font-weight: bold;
-}
-
-.badge.alert {
-    background: #ffebee;
-    color: #c62828;
-}
-
-/* Cards System */
-.card-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.card {
-    background: #ffffff;
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    cursor: pointer;
-    transition: transform 0.1s ease;
-}
-
-.card:active {
-    transform: scale(0.98);
-}
-
-.card.primary-card {
-    border-left: 5px solid #0088cc;
-}
-
-.card.weakness-card {
-    border-left: 5px solid #e53935;
-}
-
-.card.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Navigation & Tabs */
-.back-btn {
-    padding: 8px 14px;
-    background: #444;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    margin-bottom: 12px;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.tab-navigation {
-    display: flex;
-    gap: 8px;
-    margin: 12px 0;
-}
-
-.tab-btn {
-    flex: 1;
-    padding: 10px;
-    background: #e0e0e0;
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.tab-btn.active {
-    background: #0088cc;
-    color: white;
-}
-
-.section-desc {
-    font-size: 13px;
-    color: #555;
-    margin-bottom: 12px;
-}
-
-/* Test List & Question Types */
-.test-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.test-btn {
-    padding: 14px;
-    background: white;
-    color: #333;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    text-align: left;
-    cursor: pointer;
-}
-
-.sub-info {
-    display: block;
-    font-size: 11px;
-    color: #777;
-    margin-top: 4px;
-}
-
-.qtype-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.qtype-card {
-    background: white;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    cursor: pointer;
-}
-
-.qtype-card h4 {
-    font-size: 14px;
-    margin-bottom: 4px;
-}
-
-.qtype-card p {
-    font-size: 11px;
-    color: #666;
-}
-
-.tag {
-    display: inline-block;
-    font-size: 10px;
-    padding: 2px 6px;
-    background: #eee;
-    border-radius: 4px;
-    margin-top: 6px;
-}
-
-.tag.alert { background: #ffebee; color: #d32f2f; }
-.tag.success { background: #e8f5e9; color: #2e7d32; }
-
-/* Analytics & Weaknesses */
-.analytics-card {
-    background: white;
-    padding: 14px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    margin-bottom: 12px;
-}
-
-.weakness-item {
-    margin-top: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px dashed #eee;
-}
-
-.weakness-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-}
-
-.error-rate {
-    color: #d32f2f;
-    font-weight: bold;
-}
-
-.progress-bar {
-    height: 6px;
-    background: #eee;
-    border-radius: 3px;
-    margin: 6px 0;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: #e53935;
-}
-
-.weakness-sub {
-    font-size: 11px;
-    color: #888;
-}
-
-.ai-box {
-    margin-top: 8px;
-    padding: 10px;
-    background: #f0f4f8;
-    border-left: 4px solid #0088cc;
-    font-size: 12px;
-    line-height: 1.4;
-}
-
-/* Test Frame */
-#test-frame {
-    width: 100%;
-    height: 85vh;
-    border: none;
-    border-radius: 8px;
-}
-
-.top-bar {
+/* App Header */
+.app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 12px 16px;
+    background-color: #1e1e1e;
+    border-bottom: 1px solid #2d2d2d;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.active-title {
-    font-size: 12px;
-    font-weight: bold;
-    color: #555;
+.app-header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #38ef7d;
+}
+
+/* Full Screen Test Container (FOCUSED VIEW) */
+#test-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #121212;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+}
+
+.test-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #1e1e1e;
+    border-bottom: 1px solid #333;
+}
+
+.back-btn {
+    background: #2a2a2a;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.test-title-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e0e0e0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70%;
+}
+
+/* Iframe Full Size - Ekranni to'liq egallaydi */
+.test-frame-container {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.test-frame-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* General Layout Elements */
+.container {
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.card {
+    background: #1e1e1e;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: 1px solid #2d2d2d;
+}
+
+.test-btn {
+    width: 100%;
+    background: #252525;
+    border: 1px solid #333;
+    padding: 14px;
+    border-radius: 10px;
+    color: #fff;
+    text-align: left;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.test-btn:active {
+    background: #333;
 }

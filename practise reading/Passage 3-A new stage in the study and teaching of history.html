@@ -517,16 +517,12 @@ function markAttempted(e) {
         window.submitTest = function() {
             const res = originalSubmit.apply(this, arguments);
             try {
-                if (typeof questionResults !== 'undefined' && Array.isArray(questionResults)) {
                     if (window.parent) {
                         window.parent.postMessage({
-                            type: "AIOS_TEST_RESULT",
-                            results: questionResults
                         }, "*");
                     }
                 }
             } catch (e) {
-                console.error("AIOS bridge error:", e);
             }
             return res;
         };

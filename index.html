@@ -2,268 +2,40 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIOS IELTS Learning OS</title>
-
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AIOS Practice Engine</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-
 <body>
 
-<div id="app">
-
-    <!-- ================= DASHBOARD ================= -->
+    <!-- Main Dashboard -->
     <div id="main-dashboard" class="container">
-
-        <header class="header">
-            <h2>?? AIOS IELTS Learning OS</h2>
-            <p class="subtitle">
-                Adaptive AI-Driven Training Platform
-            </p>
-        </header>
-
-        <div class="card-grid">
-
-            <div class="card primary-card"
-                 onclick="showSection('reading-hub')">
-
-                <h3>?? Reading Content Engine</h3>
-
-                <p>
-                    Full Practice & Question Type Training
-                </p>
-
-                <span class="badge" id="passage-count">
-                    Loading...
-                </span>
-
-            </div>
-
-
-            <div class="card weakness-card"
-                 onclick="showSection('weakness-analytics')">
-
-                <h3>?? Weakness Analytics</h3>
-
-                <p>
-                    Real-time skill gaps & error analysis
-                </p>
-
-                <span class="badge alert"
-                      id="weakness-summary">
-                    0 Weak Points
-                </span>
-
-            </div>
-
-
-            <div class="card disabled">
-
-                <h3>?? Listening Practice</h3>
-
-                <p>
-                    Tez kunda...
-                </p>
-
-            </div>
-
-
-            <div class="card disabled">
-
-                <h3>?? Writing Engine</h3>
-
-                <p>
-                    Tez kunda...
-                </p>
-
-            </div>
-
+        <div class="app-header">
+            <h1>?? AIOS Practice</h1>
+            <span id="passage-count" style="font-size: 12px; color: #888;">0 Passages</span>
         </div>
 
+        <div style="margin-top: 16px;">
+            <h3>?? Reading Passages</h3>
+            <p style="font-size: 13px; color: #aaa; margin-bottom: 12px;">Testni tanlang va to'liq ekranda ishlang:</p>
+            <div id="full-practice-list">
+                <!-- Testlar ro'yxati chiqadi -->
+            </div>
+        </div>
     </div>
 
-
-    <!-- ================= READING HUB ================= -->
-
-    <div id="reading-hub" class="container hidden">
-
-        <button class="back-btn"
-                onclick="showSection('main-dashboard')">
-            ?? Dashboard
-        </button>
-
-        <h2>?? Reading Content Engine</h2>
-
-        <div class="tab-navigation">
-
-            <button class="tab-btn active"
-                    id="tab-full"
-                    onclick="switchReadingTab('full')">
-                ?? Full Practice
-            </button>
-
-            <button class="tab-btn"
-                    id="tab-types"
-                    onclick="switchReadingTab('types')">
-                ?? Question Types
-            </button>
-
+    <!-- FULL SCREEN TEST VIEW (Focused) -->
+    <div id="test-view" class="hidden">
+        <div class="test-header-bar">
+            <button class="back-btn">?? Orqaga</button>
+            <span id="active-test-title" class="test-title-text">Reading Test</span>
         </div>
-
-
-        <!-- FULL PRACTICE -->
-
-        <div id="full-practice-tab"
-             class="tab-content">
-
-            <p class="section-desc">
-                AIOS bankidagi barcha Reading materiallar:
-            </p>
-
-            <div id="full-practice-list"
-                 class="test-list">
-
-                <p>? Reading bank yuklanmoqda...</p>
-
-            </div>
-
+        <div class="test-frame-container">
+            <iframe id="test-frame" src="about:blank"></iframe>
         </div>
-
-
-        <!-- QUESTION TYPES -->
-
-        <div id="question-types-tab"
-             class="tab-content hidden">
-
-            <p class="section-desc">
-                AIOS barcha Reading fayllaridagi savollarni
-                avtomatik savol turiga ajratadi.
-            </p>
-
-            <div id="qtype-grid"
-                 class="qtype-grid">
-
-                <p>? Question Types yuklanmoqda...</p>
-
-            </div>
-
-        </div>
-
     </div>
 
-
-    <!-- ================= QUESTION TYPE VIEW ================= -->
-
-    <div id="qtype-view"
-         class="container hidden">
-
-        <button class="back-btn"
-                onclick="showSection('reading-hub')">
-            ?? Question Types
-        </button>
-
-        <h2 id="qtype-title">
-            ?? Question Type
-        </h2>
-
-        <p id="qtype-description"
-           class="section-desc">
-        </p>
-
-        <div id="qtype-question-list"
-             class="test-list">
-
-        </div>
-
-    </div>
-
-
-    <!-- ================= WEAKNESS ================= -->
-
-    <div id="weakness-analytics"
-         class="container hidden">
-
-        <button class="back-btn"
-                onclick="showSection('main-dashboard')">
-            ?? Dashboard
-        </button>
-
-        <h2>?? Adaptive Weakness Matrix</h2>
-
-        <p class="section-desc">
-            AIOS sizning savol turi bo‘yicha xatolaringizni
-            kuzatib boradi.
-        </p>
-
-
-        <div class="analytics-card">
-
-            <h3>
-                ?? Active Weaknesses
-            </h3>
-
-            <div id="weakness-list"
-                 class="weakness-list">
-
-                <p>
-                    Hozircha natijalar mavjud emas.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="analytics-card">
-
-            <h3>
-                ?? AI Engine Recommendation
-            </h3>
-
-            <div id="ai-recommendation"
-                 class="ai-box">
-
-                Reading testlarini bajarganingizdan
-                keyin AIOS zaifliklarni aniqlaydi.
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ================= TEST VIEW ================= -->
-
-    <div id="test-view"
-         class="container hidden">
-
-        <div class="top-bar">
-
-            <button class="back-btn"
-                    onclick="showSection('reading-hub')">
-                ?? Reading'ga qaytish
-            </button>
-
-            <span id="active-test-title"
-                  class="active-title">
-                IELTS Test
-            </span>
-
-        </div>
-
-        <iframe id="test-frame"
-                src=""
-                frameborder="0">
-        </iframe>
-
-    </div>
-
-</div>
-
-
-<script src="app.js"></script>
-
+    <script src="app.js"></script>
 </body>
 </html>
