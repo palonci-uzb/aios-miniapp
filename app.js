@@ -1,126 +1,94 @@
-// Telegram WebApp integratsiyasi
-const tg = window.Telegram?.WebApp;
-if (tg) {
-    tg.expand();
-    tg.ready();
-}
+// AIOS Mini App Engine
+let contentBank = null;
 
-// Global State
-const state = {
-    weaknesses: {
-        'TFNG': { total: 12, errors: 7, rate: 58 },
-        'Matching Headings': { total: 10, errors: 6, rate: 60 },
-        'MCQ': { total: 15, errors: 2, rate: 13 },
-        'Completion': { total: 8, errors: 2, rate: 25 }
+// Page Load
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
     }
-};
+    loadContentBank();
+});
 
-// Section Switching
-function showSection(sectionId) {
-    const sections = ['main-dashboard', 'reading-hub', 'weakness-analytics', 'test-view'];
-    sections.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            if (id === sectionId) {
-                el.classList.remove('hidden');
-            } else {
-                el.classList.add('hidden');
-            }
+// Load content_bank.json
+async function loadContentBank() {
+    try {
+        const response = await fetch('content_bank.json');
+        if (response.ok) {
+            contentBank = await response.json();
+            console.log('Content Bank Loaded:', contentBank);
+            updateDashboardStats();
         }
-    });
-
-    if (sectionId === 'weakness-analytics') {
-        renderAnalytics();
+    } catch (e) {
+        console.warn('content_bank.json topilmadi yoki standart rejim:', e);
     }
 }
 
-// Reading Tab Switching
+// Navigation
+function showSection(sectionId) {
+    document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+    const target = document.getElementById(sectionId);
+    if (target) target.classList.remove('hidden');
+}
+
+// Switch Reading Tabs
 function switchReadingTab(tab) {
     const fullTab = document.getElementById('full-practice-tab');
-    const typesTab = document.getElementById('question-types-tab');
+    const typeTab = document.getElementById('question-types-tab');
     const btnFull = document.getElementById('tab-full');
     const btnTypes = document.getElementById('tab-types');
 
     if (tab === 'full') {
         fullTab.classList.remove('hidden');
-        typesTab.classList.add('hidden');
+        typeTab.classList.add('hidden');
         btnFull.classList.add('active');
         btnTypes.classList.remove('active');
     } else {
         fullTab.classList.add('hidden');
-        typesTab.classList.remove('hidden');
+        typeTab.classList.remove('hidden');
         btnFull.classList.remove('active');
         btnTypes.classList.add('active');
     }
 }
 
-// Test View Player
-function openTest(filePath, title, category) {
-    showSection('test-view');
+// Open Test in Iframe
+function openTest(url, title, type) {
     const frame = document.getElementById('test-frame');
     const titleEl = document.getElementById('active-test-title');
     
-    if (frame) frame.src = filePath;
-    if (titleEl) titleEl.innerText = `${category}: ${title}`;
+    if (frame && titleEl) {
+        frame.src = url;
+        titleEl.innerText = `${title} (${type})`;
+        showSection('test-view');
+    }
 }
 
-// Question Type Filter
-function filterByQType(type) {
-    alert(`?? "${type}" bo'yicha ajratilgan savollar banki yuklanmoqda...\nAIOS Content Engine barcha passage'lardan ushbu turga oid savollarni avtomatik yig'ib beradi.`);
-}
+// Filter Questions by Type
+function filterByQType(qType) {
+    if (!contentBank) {
+        alert("Content Bank yuklanmagan. Iltimos, serverni tekshiring.");
+        return;
+    }
 
-// Render Weakness Analytics
-function renderAnalytics() {
-    const listEl = document.getElementById('weakness-list');
-    const aiEl = document.getElementById('ai-recommendation');
-    const summaryBadge = document.getElementById('weakness-summary');
-
-    if (!listEl) return;
-
-    listEl.innerHTML = '';
-    let weaknessCount = 0;
-    let criticalTypes = [];
-
-    Object.keys(state.weaknesses).forEach(type => {
-        const data = state.weaknesses[type];
-        if (data.rate > 40) { // 40% dan yuqori xatolik zaif nuqta
-            weaknessCount++;
-            criticalTypes.push(type);
-
-            const item = document.createElement('div');
-            item.className = 'weakness-item';
-            item.innerHTML = `
-                <div class="weakness-header">
-                    <strong>${type}</strong>
-                    <span class="error-rate">${data.rate}% Error Rate</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${data.rate}%"></div>
-                </div>
-                <p class="weakness-sub">${data.errors} / ${data.total} ta xato savol</p>
-            `;
-            listEl.appendChild(item);
-        }
+    let foundQuestions = [];
+    contentBank.passages.forEach(p => {
+        p.questions.forEach(q => {
+            if (q.type === qType || (qType === 'Completion' && q.type.includes('Completion'))) {
+                foundQuestions.push({ passageTitle: p.title, ...q });
+            }
+        });
     });
 
-    if (summaryBadge) {
-        summaryBadge.innerText = `${weaknessCount} Weak Points`;
-    }
-
-    if (aiEl) {
-        if (criticalTypes.length > 0) {
-            aiEl.innerHTML = `
-                <strong>?? AI Engine Aniqladi:</strong><br>
-                Oxirgi testlarda <strong>${criticalTypes.join(' va ')}</strong> savol turlarida xatolar yuqori.<br><br>
-                ?? <strong>Tavsiya:</strong> Bugungi mashqni aynan <u>Question Types ? ${criticalTypes[0]}</u> bo'limidan boshlang.
-            `;
-        } else {
-            aiEl.innerText = "?? Barcha savol turlari bo'yicha ko'rsatkichlaringiz a'lo darajada!";
-        }
-    }
+    alert(`${qType} bo'yicha jami ${foundQuestions.length} ta savol topildi!`);
 }
 
-// Initial Load
-document.addEventListener('DOMContentLoaded', () => {
-    renderAnalytics();
-});
+// Dashboard Stats Update
+function updateDashboardStats() {
+    if (!contentBank) return;
+    const totalQ = contentBank.passages.reduce((sum, p) => sum + p.question_count, 0);
+    const summaryEl = document.getElementById('weakness-summary');
+    if (summaryEl) {
+        summaryEl.innerText = `${totalQ} Questions Ready`;
+        summaryEl.classList.remove('alert');
+    }
+}
