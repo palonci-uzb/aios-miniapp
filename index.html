@@ -3,50 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AIOS IELTS Practice</title>
+    <title>AIOS Learning OS</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+    <div id="banner" class="banner hidden"></div>
 
-    <!-- Main Dashboard -->
-    <div id="main-dashboard" class="container">
-        <!-- Header -->
-        <div class="app-header">
-            <div class="brand-badge">
-                <div class="brand-icon">?</div>
-                <div class="brand-text">
-                    <h1>AIOS Practice</h1>
-                    <p>IELTS Reading Engine</p>
-                </div>
-            </div>
-            <span id="passage-count" class="passage-badge">0 Passages</span>
-        </div>
-
-        <!-- Motivation Hero Banner -->
-        <div class="hero-card">
-            <h2>?? Maqsad sari navbatdagi qadam!</h2>
-            <p>Bugungi kichik mashq ertangi yuqori Band Score poydevoridir. Testni tanlang va to'liq diqqat bilan ishlang.</p>
-        </div>
-
-        <!-- Passage List -->
-        <div class="section-title">Mavjud Reading Passage'lar</div>
-        <div id="full-practice-list" class="test-list">
-            <!-- JavaScript orqali zamonaviy kartochkalar yuklanadi -->
-        </div>
+    <!-- Asosiy ilova: ekranlar app.js tomonidan #screen ichiga chiziladi -->
+    <div id="app" class="app-shell">
+        <main id="screen" class="container"></main>
+        <nav id="nav" class="bottom-nav">
+            <button data-nav="home"><span>🏠</span>Home</button>
+            <button data-nav="reading"><span>📖</span>Reading</button>
+            <button data-nav="types"><span>🎯</span>Types</button>
+            <button data-nav="retry"><span>🔁</span>Retry</button>
+            <button data-nav="progress"><span>📈</span>Progress</button>
+        </nav>
     </div>
 
-    <!-- FULL SCREEN TEST VIEW (Focused View) -->
+    <!-- FULLSCREEN TEST (mavjud Reading HTML testlari, o'zgartirilmagan) -->
     <div id="test-view" class="hidden">
         <div class="test-header-bar">
-            <button class="back-btn">&larr; Orqaga</button>
+            <button class="back-btn" id="test-back">&larr; Orqaga</button>
             <span id="active-test-title" class="test-title-text">Reading Test</span>
         </div>
         <div class="test-frame-container">
             <iframe id="test-frame" src="about:blank"></iframe>
         </div>
+        <div id="test-overlay" class="test-overlay hidden"></div>
     </div>
 
+    <script src="config.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

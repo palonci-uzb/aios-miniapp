@@ -492,30 +492,5 @@ function markAttempted(e) {
   }
 }
 </script>
-
-
-
-
-<script>
-(function() {
-    const originalSubmit = window.submitTest;
-    if (typeof originalSubmit === 'function' && !window.__aios_patched__) {
-        window.__aios_patched__ = true;
-        window.submitTest = function() {
-            const res = originalSubmit.apply(this, arguments);
-            try {
-                    if (window.parent) {
-                        window.parent.postMessage({
-                        }, "*");
-                    }
-                }
-            } catch (e) {
-            }
-            return res;
-        };
-    }
-})();
-</script>
-
 </body>
 </html>
